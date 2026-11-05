@@ -39,3 +39,7 @@ A feature is done only when it has:
 5. Updated docs
 6. Demonstration evidence
 7. No claim beyond measured results
+
+## Implementation status (2026-11-05)
+
+See [`15_IMPLEMENTATION_STATUS.md`](15_IMPLEMENTATION_STATUS.md) for the code ledger. MVP-1 is **partially delivered**: live webcam input, an editable GVP polygon, a rolling evidence buffer, a zone-limited scene-stability heuristic and optional API persistence are working. Real vehicle detection/tracking, a vehicle stop timer, a multi-cue dumping-event model and multi-frame ANPR remain MVP-2 / next-stage work.

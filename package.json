@@ -1,0 +1,17 @@
+{
+  "name": "gvp-guard",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Test tooling for the GVP-Guard static prototype. The app itself has no build step or runtime dependencies.",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "test:unit": "node --test tests/core.test.js",
+    "test:ui": "node --test tests/ui.test.js",
+    "serve": "python3 -m http.server 8000 --bind 0.0.0.0",
+    "serve:api": "python3 -m uvicorn backend.app:app --host 0.0.0.0 --port 8000"
+  },
+  "devDependencies": {
+    "jsdom": "^31.0.0"
+  }
+}
