@@ -49,7 +49,7 @@ The same distinction must be used in the docs, the deck, the demo and judge answ
 3. Do not publish accuracy, false-alert, impact or response-time percentages unless they come from documented tests with hardware, footage conditions and sample size recorded. Pilot targets are targets, not achievements.
 4. Use `docs/hackathon/JUDGE_QA.md` for shared terminology; "review-ready incident record", never "legally admissible evidence".
 
-## Consistency watchlist (open work, not yet resolved)
+## Consistency watchlist (status after the demo review)
 
 These are mismatches found while consolidating the attachments. They are recorded here so they are not silently changed.
 
@@ -58,7 +58,7 @@ These are mismatches found while consolidating the attachments. They are recorde
 3. **PRD vs reality:** `01_PRODUCT_REQUIREMENTS.md` lists requirements without a status column; readers must cross-check the status matrix above before assuming anything is implemented.
 4. **Branch policy:** the original `CONTRIBUTING.md` and `14_TEAM_WORKFLOW.md` assume a protected `main`, but `main` currently contains only a placeholder README while `master` holds the demo. Confirm the long-term base branch with the team.
 5. **Team roster:** `14_TEAM_WORKFLOW.md` lists eight roles (four pairs) without names; the judge deck names all eight members. Names are captured in `hackathon/SUBMISSION_BRIEF.md`.
-6. **Demo hygiene:** `index.html` contains injected Cloudflare challenge/beacon script tags and a `seedHistory()` function that fabricates sample records. Remove the third-party scripts and clearly label seeded data before any submission or offline demo.
+6. **Demo hygiene (partly resolved):** injected Cloudflare challenge/beacon scripts and the embedded token were removed, history rows are now DOM-escaped, seeded records are flagged `DEMO`, object URLs are revoked, and the heuristic score is labelled as uncalibrated. Still open: the `Probable dumping` / `Ambiguous` labels come from a fixed 8% pixel-difference threshold with a fabricated score, map zone counts are hardcoded, and status labels still differ from `02_SYSTEM_ARCHITECTURE.md` (item 1).
 7. **Binary artifacts:** the 16-page A4 handbook and the 8-slide judge-ready PDF are not committed; their canonical facts are mirrored in `hackathon/*.md`.
 8. **Repo scaffolding:** issue templates, coding standards, LICENSE and environment setup are still P0 items in `12_BACKLOG.md`.
 

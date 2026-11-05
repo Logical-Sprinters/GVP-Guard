@@ -20,7 +20,7 @@ Demo-stage/planned: real vehicle detection/tracking, dumping-event model, automa
 See [docs/README.md](docs/README.md) for the full working / demo-stage / planned status matrix.
 
 ## Run current prototype
-The demo is the root-level `index.html`. It is a static page with no build step; incident history is stored only in the browser's `localStorage`.
+The demo is the root-level `index.html`. It is a static page with no build step and no external scripts, fonts or network calls, so it also runs fully offline; incident history is stored only in the browser's `localStorage`.
 
 ```bash
 cd /path/to/GVP-Guard
