@@ -35,3 +35,8 @@ coverage/
 *.log
 evidence/
 clips/
+
+# Local runtime data (SQLite database created by backend/app.py)
+backend/data/
+*.db
+*.sqlite3

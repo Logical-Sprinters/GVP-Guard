@@ -20,6 +20,7 @@ Canonical project documentation for GVP-Guard: NightEye AI. The numbered files a
 | 12 | [Prioritized Backlog](12_BACKLOG.md) | P0–P5 work items and issue template rule |
 | 13 | [Demo & Acceptance Plan](13_DEMO_AND_ACCEPTANCE.md) | Controlled/live demo script, honesty rules, release checklist |
 | 14 | [Team Workflow & Ownership](14_TEAM_WORKFLOW.md) | Four pairs, eight roles, Git workflow, definitions |
+| 15 | [Implementation Status](15_IMPLEMENTATION_STATUS.md) | What code exists today, test commands, open decisions |
 
 ## By theme
 
@@ -27,18 +28,19 @@ Canonical project documentation for GVP-Guard: NightEye AI. The numbered files a
 - **Architecture & engineering:** 02, 04, 05, 06, 07
 - **Quality, security & operations:** 08, 09, 10
 - **Planning & delivery:** 11, 12, 13, 14
+- **Implementation ledger:** 15, [backend/README.md](../backend/README.md)
 - **Hackathon submission:** [SUBMISSION_BRIEF.md](hackathon/SUBMISSION_BRIEF.md), [JUDGE_QA.md](hackathon/JUDGE_QA.md)
 - **Repository governance:** root [README.md](../README.md), [CONTRIBUTING.md](../CONTRIBUTING.md), [CHANGELOG.md](../CHANGELOG.md)
 
 ## Current status matrix
 
-The same distinction must be used in the docs, the deck, the demo and judge answers. Source of truth: the "Current Prototype Status" table in the team handbook and the "Pipeline Readiness" panel in `index.html`.
+The same distinction must be used in the docs, the deck, the demo and judge answers. **Current code status lives in [15_IMPLEMENTATION_STATUS.md](15_IMPLEMENTATION_STATUS.md)** — check it before quoting a feature in a presentation. Baseline from the team handbook is kept below for traceability.
 
 | Status | Capabilities |
 |--------|--------------|
-| **WORKING** (MVP-0 browser demo) | Video upload/playback; before/during/after frame extraction; pixel-based scene comparison; incident ID, timestamp and editable plate field; approve/reject/cleanup actions; local incident history; illustrative GVP map; JSON incident export |
-| **DEMO STAGE** | Vehicle tracking overlay; suspicious-stop workflow; editable plate candidate |
-| **PLANNED / NEXT STAGE** | Live webcam/RTSP input; real vehicle detection and tracking; multi-cue dumping-event model; GVP polygon editor; multi-frame night ANPR and OCR; backend persistence, authentication, roles, audit, object storage |
+| **WORKING** (MVP-0 + MVP-1 technical proof) | Recorded video **and live webcam**; editable GVP polygon; zone-limited pixel comparison; rolling evidence buffer with real JPEG frames; live scene-stability monitor (heuristic, **not** vehicle tracking); before/during/after evidence; incident record with canonical status codes, reviewer and comment; approve/reject/cleanup with audit rows; local history; GVP map with transparent priority score; JSON export containing real frame data; optional FastAPI + SQLite persistence via relative `/api/v1` URLs |
+| **DEMO STAGE** | Tracking overlay (CSS box); editable plate candidate; the illustrative cue score and fixed 8% threshold, now explicitly labelled as uncalibrated heuristics |
+| **PLANNED / NEXT STAGE** | Real vehicle detection and tracking; multi-cue dumping-event model; plate detector and multi-frame night ANPR/OCR; RTSP/CCTV input; authentication, roles, object storage, signed URLs, retention, observability |
 | **FUTURE / EXTERNAL DEPENDENCY** | GMC-approved footage and camera access; vehicle-registry or e-challan integration; field pilot; citywide deployment |
 | **EXPLICITLY OUT OF SCOPE** | Automatic guilt or fines, guaranteed offender identification, legally admissible evidence claims, face recognition, predictive policing, drone verification |
 
@@ -53,14 +55,14 @@ The same distinction must be used in the docs, the deck, the demo and judge answ
 
 These are mismatches found while consolidating the attachments. They are recorded here so they are not silently changed.
 
-1. **Status labels:** `02_SYSTEM_ARCHITECTURE.md` uses `CANDIDATE → SUSPICIOUS → REVIEW_REQUIRED → APPROVED/REJECTED/CLEANUP_REQUESTED → CLOSED`; the handbook uses Normal / Suspicious halt / Probable event / Low confidence; the demo UI uses "Probable dumping", "Ambiguous", "REVIEW REQUIRED", "Cleanup requested". `12_BACKLOG.md` P0 already calls for freezing these labels.
+1. **Status labels (partly resolved):** `assets/js/core.js` now defines the canonical `STATUS` enum from `02_SYSTEM_ARCHITECTURE.md` and every incident stores a `statusCode`. Display text still uses "Probable dumping" / "Ambiguous" / "REVIEW REQUIRED", so the UI and deck wording must still be frozen against the enum. `12_BACKLOG.md` P0 remains open.
 2. **Roadmaps:** `11_DEVELOPMENT_ROADMAP.md` (phases 0–6), the handbook (5 stages) and the judge deck (NOW / 0–3 / 3–6 / 6–12 months) describe the same plan at different granularity. Reconcile before the final-round presentation so all eight members quote one timeline.
 3. **PRD vs reality:** `01_PRODUCT_REQUIREMENTS.md` lists requirements without a status column; readers must cross-check the status matrix above before assuming anything is implemented.
 4. **Branch policy:** the original `CONTRIBUTING.md` and `14_TEAM_WORKFLOW.md` assume a protected `main`, but `main` currently contains only a placeholder README while `master` holds the demo. Confirm the long-term base branch with the team.
 5. **Team roster:** `14_TEAM_WORKFLOW.md` lists eight roles (four pairs) without names; the judge deck names all eight members. Names are captured in `hackathon/SUBMISSION_BRIEF.md`.
-6. **Demo hygiene (partly resolved):** injected Cloudflare challenge/beacon scripts and the embedded token were removed, history rows are now DOM-escaped, seeded records are flagged `DEMO`, object URLs are revoked, and the heuristic score is labelled as uncalibrated. Still open: the `Probable dumping` / `Ambiguous` labels come from a fixed 8% pixel-difference threshold with a fabricated score, map zone counts are hardcoded, and status labels still differ from `02_SYSTEM_ARCHITECTURE.md` (item 1).
+6. **Demo hygiene (resolved for code):** injected Cloudflare scripts removed, history rows DOM-escaped, seeded records flagged `DEMO`, object URLs revoked, seek timeout added, heuristic score labelled as uncalibrated, and map counts now derive from real records. The fixed 8% threshold remains a labelled heuristic (MVP-2 replaces it); display wording is tracked in item 1.
 7. **Binary artifacts:** the 16-page A4 handbook and the 8-slide judge-ready PDF are not committed; their canonical facts are mirrored in `hackathon/*.md`.
-8. **Repo scaffolding:** issue templates, coding standards, LICENSE and environment setup are still P0 items in `12_BACKLOG.md`.
+8. **Repo scaffolding (partly resolved):** `.gitignore`, `package.json`, a JS + Python test harness and `backend/requirements.txt` now exist. Issue templates, coding standards and LICENSE are still P0 items in `12_BACKLOG.md`.
 
 ## Conventions
 

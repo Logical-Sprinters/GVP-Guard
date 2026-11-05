@@ -46,3 +46,12 @@ Base path: `/api/v1`
 
 ## API rules
 Use UUIDs, ISO-8601 UTC timestamps, pagination, role checks, validation, idempotency for actions and consistent error envelopes. Never expose raw storage paths.
+
+## Implementation status (2026-11-05)
+
+`backend/app.py` now serves this API on the same origin as the static app:
+
+- Implemented: `GET /health`; `GET`, `POST`, `DELETE /incidents`; `GET`, `PATCH /incidents/{id}`; `POST /incidents/{id}/decision`; `GET /incidents/{id}/audit`; `GET /incidents/{id}/export`; `GET /gvps`; `GET /analytics/summary`.
+- Still draft: cameras/zones, analysis jobs, events, evidence upload/download, cleanup assignment, authentication and role checks, pagination, idempotency keys and consistent error envelopes.
+
+See [`../backend/README.md`](../backend/README.md) for run instructions.

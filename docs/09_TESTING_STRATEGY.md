@@ -28,3 +28,10 @@ Set thresholds only after baseline tests. Always publish hardware, footage condi
 
 ## Test record
 Each release stores dataset version, commit, model version, configuration, results and known limitations.
+
+## Test harness (2026-11-05)
+
+- `npm install && npm test` — 14 Node tests: 11 pure-logic tests for geometry, zone-limited differencing, scoring, status mapping and report notices, plus 3 jsdom tests for offline boot, XSS-safe rendering, tab behaviour and API-mode detection.
+- `python3 -m unittest backend.test_db -v` — 5 SQLite tests covering CRUD, decisions/audit, filters/summary, transparent priority scoring and clearing.
+
+The golden scenarios above are not yet automated as video tests, and field tests still require GMC-approved footage. No accuracy or false-alert figures are published.
