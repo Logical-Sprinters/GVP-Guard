@@ -111,6 +111,24 @@ export function createStorage(apiBase = CONFIG.apiBase) {
     return [];
   }
 
+  async function getEvidence(incidentId) {
+    if (!remote) return null;
+    try {
+      const response = await fetch(`${apiBase}/incidents/${encodeURIComponent(incidentId)}/evidence`);
+      if (response.ok) return await response.json();
+    } catch { /* best-effort */ }
+    return null;
+  }
+
+  async function downloadEvidence(incidentId, frame) {
+    if (!remote) return null;
+    try {
+      const response = await fetch(`${apiBase}/evidence/${encodeURIComponent(incidentId)}/${frame}`);
+      if (response.ok) return await response.blob();
+    } catch { /* best-effort */ }
+    return null;
+  }
+
   async function seed(records) {
     if (remote) {
       for (const record of records) {
@@ -134,5 +152,5 @@ export function createStorage(apiBase = CONFIG.apiBase) {
   }
 
   return { check, load, upsert, recordDecision, requestCleanup, updateCleanupRequest,
-    loadCleanupRequests, seed, clear, isRemote: () => remote };
+    loadCleanupRequests, getEvidence, downloadEvidence, seed, clear, isRemote: () => remote };
 }

@@ -8,6 +8,7 @@ origin, so browser code only ever uses relative URLs (no CORS, no localhost).
 Without this server the static page still works fully offline via localStorage.
 Draft contract: docs/06_API_SPEC.md.
 """
+import base64
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -120,9 +121,44 @@ def update_cleanup_request(cleanup_id: int, changes: CleanupRequestUpdate):
             'assignedTo': row['assigned_to'], 'completedAt': row['completed_at']}
 
 
-@app.get(API + '/incidents/{incident_id}/audit')
-def audit_trail(incident_id: str):
-    return {'items': db.get_audit(incident_id), 'decisions': db.get_decisions(incident_id)}
+@app.get(API + '/incidents/{incident_id}/evidence')
+def read_evidence(incident_id: str):
+    incident = db.get_incident(incident_id)
+    if incident is None:
+        raise HTTPException(status_code=404, detail='Incident not found')
+    frames = incident.get('evidenceFrames') or {}
+    return {
+        'incidentId': incident_id,
+        'frames': {
+            'before': frames.get('before'),
+            'during': frames.get('during'),
+            'after': frames.get('after'),
+        },
+        'notice': 'Evidence frames are JPEG data URLs captured from the source. No chain of custody or legal admissibility is claimed.',
+    }
+
+
+@app.get(API + '/evidence/{incident_id}/{frame}')
+def download_evidence(incident_id: str, frame: str):
+    incident = db.get_incident(incident_id)
+    if incident is None:
+        raise HTTPException(status_code=404, detail='Incident not found')
+    frames = incident.get('evidenceFrames') or {}
+    if frame not in ('before', 'during', 'after'):
+        raise HTTPException(status_code=400, detail='Frame must be one of: before, during, after')
+    data_url = frames.get(frame)
+    if not data_url:
+        raise HTTPException(status_code=404, detail=f'{frame} frame not found for this incident')
+    try:
+        header, b64 = data_url.split(',', 1)
+        image_bytes = base64.b64decode(b64)
+    except Exception:
+        raise HTTPException(status_code=500, detail='Unable to decode evidence frame')
+    media_type = 'image/jpeg'
+    if 'image/png' in header:
+        media_type = 'image/png'
+    return Response(content=image_bytes, media_type=media_type,
+                    headers={'Content-Disposition': f'attachment; filename="{incident_id}-{frame}.jpg"'})
 
 
 @app.get(API + '/incidents/{incident_id}/export')
