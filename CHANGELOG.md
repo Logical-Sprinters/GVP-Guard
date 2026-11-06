@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.1] — Step 4 readiness planning (2026-11-06)
+
+Documentation-only release: defines the prerequisites that must be met before Step 4 (vehicle detection + multi-frame ANPR) can begin. No application code changed; Step 4 remains deferred.
+
+### Added
+- `docs/STEP4_READINESS_PLAN.md`: model weights acquisition plan (YOLO11n/ByteTrack/OCR), controlled dataset collection protocol (permitted site, lighting conditions, positive/negative scenarios, annotation schema, dataset split, minimum sample sizes), benchmarking plan (metrics, targets, hardware to record, go/no-go criteria)
+- `docs/12_BACKLOG.md`: P0 item for Step 4 readiness (weights, dataset, benchmarking plan)
+- `docs/README.md`: Step 4 readiness indexed as a working document (non-canonical)
+
+### Changed
+- `docs/15_IMPLEMENTATION_STATUS.md`: Step 4 open decision references `docs/STEP4_READINESS_PLAN.md` and backlog P0
+
 ## [0.3.0] — Evidence download & release (2026-11-06)
 
 ### Added

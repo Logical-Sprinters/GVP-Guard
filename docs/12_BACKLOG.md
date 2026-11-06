@@ -6,6 +6,7 @@
 - Add issue templates and coding standards
 - Preserve current demo as a tagged release
 - Regenerate judge-deck slide 8 for the settled 4-role × 2-member roster (`16_TEAM_ROSTER_AND_OWNERSHIP.md`, confirmed 2026-11-06)
+- Step 4 readiness: acquire and verify model weights (YOLO11n/ByteTrack/OCR), document controlled dataset collection protocol, and create benchmarking plan with go/no-go criteria (`docs/STEP4_READINESS_PLAN.md`)
 
 ## P1 — Live MVP
 - Webcam input

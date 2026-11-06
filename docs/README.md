@@ -31,6 +31,7 @@ Canonical project documentation for GVP-Guard: NightEye AI. The numbered files a
 - **Planning & delivery:** 11, 12, 13
 - **Team & governance:** 14, 16
 - **Implementation ledger:** 15, [backend/README.md](../backend/README.md)
+- **Step 4 readiness:** [STEP4_READINESS_PLAN.md](STEP4_READINESS_PLAN.md) — model weights, controlled dataset, benchmarking plan, go/no-go criteria (working document, not a canonical spec)
 - **Hackathon submission:** [SUBMISSION_BRIEF.md](hackathon/SUBMISSION_BRIEF.md), [JUDGE_QA.md](hackathon/JUDGE_QA.md)
 - **Repository governance:** root [README.md](../README.md), [CONTRIBUTING.md](../CONTRIBUTING.md), [CHANGELOG.md](../CHANGELOG.md)
 
