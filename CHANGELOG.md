@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.2.3] — Cleanup-request workflow (2026-11-06)
+
+### Added
+- `backend/db.py`: `cleanup_requests` table (`id, incident_id, status, assigned_to, requested_at, completed_at`); `add_cleanup_request`, `get_cleanup_request`, `get_cleanup_requests`, `update_cleanup_request`, `delete_all_cleanup_requests`; audit rows for `CLEANUP_REQUESTED` and `UPDATE` actions; `delete_all_incidents` also clears cleanup requests
+- `backend/schemas.py`: `CleanupRequestIn`, `CleanupRequestUpdate` Pydantic models
+- `backend/app.py`: endpoints `POST /incidents/{id}/cleanup-request`, `GET /incidents/{id}/cleanup-request`, `GET /cleanup-requests`, `PATCH /cleanup-requests/{id}`
+- `assets/js/storage.js`: `requestCleanup`, `updateCleanupRequest`, `loadCleanupRequests` methods
+- `assets/js/app.js`: cleanup-request UI section (request/assign/complete/cancel), status display, `loadCleanupSection` on incident load
+- `index.html`: cleanup-request panel with assignee input and action buttons
+- `backend/test_db.py`: 5 cleanup-request tests (create/get, list by incident, update status, audit trail, delete all)
+- `tests/core.test.js`: 11 tests (unchanged, all pass)
+
+### Changed
+- `docs/06_API_SPEC.md`: cleanup-request endpoints marked implemented
+- `docs/07_DATABASE_SCHEMA.md`: `cleanup_requests` table marked implemented
+- `docs/15_IMPLEMENTATION_STATUS.md`: cleanup-request added to "Working now" table
+- `backend/test_db.py`: 10 tests total (5 original + 5 cleanup-request), all pass
+
 ## [0.2.2] — Status labels frozen to canonical STATUS enum (2026-11-06)
 
 ### Changed

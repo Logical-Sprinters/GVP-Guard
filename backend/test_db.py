@@ -66,6 +66,52 @@ class DatabaseTests(unittest.TestCase):
         self.assertEqual(db.list_incidents(), [])
         self.assertTrue(any(row['action'] == 'CLEAR' for row in db.get_audit('*')))
 
+    def test_cleanup_request_create_and_get(self):
+        db.upsert_incident(self._incident())
+        row = db.add_cleanup_request('INC-1', assigned_to='Officer A')
+        self.assertIsNotNone(row)
+        self.assertEqual(row['incident_id'], 'INC-1')
+        self.assertEqual(row['status'], 'requested')
+        self.assertEqual(row['assigned_to'], 'Officer A')
+        self.assertIsNotNone(row['requested_at'])
+        self.assertIsNone(row['completed_at'])
+
+        fetched = db.get_cleanup_request(row['id'])
+        self.assertEqual(fetched['status'], 'requested')
+        self.assertEqual(fetched['assigned_to'], 'Officer A')
+
+    def test_cleanup_requests_listed_by_incident(self):
+        db.upsert_incident(self._incident('INC-1'))
+        db.upsert_incident(self._incident('INC-2'))
+        db.add_cleanup_request('INC-1', assigned_to='Officer A')
+        db.add_cleanup_request('INC-1', assigned_to='Officer B')
+        db.add_cleanup_request('INC-2', assigned_to='Officer C')
+
+        inc1 = db.get_cleanup_requests('INC-1')
+        self.assertEqual(len(inc1), 2)
+        inc2 = db.get_cleanup_requests('INC-2')
+        self.assertEqual(len(inc2), 1)
+
+    def test_cleanup_request_update_status(self):
+        db.upsert_incident(self._incident())
+        row = db.add_cleanup_request('INC-1')
+        updated = db.update_cleanup_request(row['id'], {'status': 'completed'})
+        self.assertEqual(updated['status'], 'completed')
+        self.assertIsNotNone(updated['completed_at'])
+
+    def test_cleanup_request_audit_trail(self):
+        db.upsert_incident(self._incident())
+        db.add_cleanup_request('INC-1', assigned_to='Officer A')
+        actions = [r['action'] for r in db.get_audit('INC-1')]
+        self.assertIn('CLEANUP_REQUESTED', actions)
+
+    def test_delete_all_cleanup_requests(self):
+        db.upsert_incident(self._incident())
+        db.add_cleanup_request('INC-1')
+        self.assertEqual(len(db.get_cleanup_requests()), 1)
+        db.delete_all_cleanup_requests()
+        self.assertEqual(len(db.get_cleanup_requests()), 0)
+
 
 if __name__ == '__main__':
     unittest.main()

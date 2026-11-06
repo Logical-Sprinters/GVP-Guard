@@ -117,6 +117,21 @@
             <button class="btn light" id="download">Download Incident Report</button>
             <button class="btn light" id="newIncident">New Incident</button>
           </div>
+          <div class="cleanup" id="cleanupSection" style="display:none;margin-top:10px;padding:10px;background:#f4f1ec;border:1px dashed #b8a989;border-radius:6px">
+            <div style="font-weight:bold;margin-bottom:6px">Cleanup Request</div>
+            <div class="kv" style="gap:12px">
+              <div>Status<b id="cleanupStatus">—</b></div>
+              <div>Assigned to<b id="cleanupAssignee">—</b></div>
+              <div>Requested at<b id="cleanupRequestedAt">—</b></div>
+            </div>
+            <label class="block" style="font-size:12px;margin-top:8px">Assign officer</label>
+            <input class="commentbox" id="cleanupAssigneeInput" placeholder="Officer name" aria-label="Cleanup assignee">
+            <div class="actions" style="margin-top:8px">
+              <button class="btn light" id="cleanupRequest">Request cleanup</button>
+              <button class="btn light" id="cleanupComplete" style="margin-left:6px">Mark complete</button>
+              <button class="btn light" id="cleanupCancel" style="margin-left:6px">Close</button>
+            </div>
+          </div>
           <div class="status" id="note">Human review is mandatory before any enforcement action.</div>
         </div>
       </aside>

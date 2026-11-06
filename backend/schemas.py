@@ -33,3 +33,12 @@ class DecisionIn(BaseModel):
     reviewer: str | None = 'Demo officer'
     comment: str | None = ''
     reviewedPlate: str | None = None
+
+
+class CleanupRequestIn(BaseModel):
+    assigned_to: str | None = None
+
+
+class CleanupRequestUpdate(BaseModel):
+    status: str | None = None
+    assigned_to: str | None = None

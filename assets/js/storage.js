@@ -73,6 +73,44 @@ export function createStorage(apiBase = CONFIG.apiBase) {
     } catch { /* audit is best-effort in the prototype */ }
   }
 
+  async function requestCleanup(incidentId, assignedTo) {
+    if (!remote) return null;
+    try {
+      const response = await fetch(`${apiBase}/incidents/${encodeURIComponent(incidentId)}/cleanup-request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assigned_to: assignedTo || null })
+      });
+      if (response.ok) return await response.json();
+    } catch { /* best-effort */ }
+    return null;
+  }
+
+  async function updateCleanupRequest(cleanupId, changes) {
+    if (!remote) return null;
+    try {
+      const response = await fetch(`${apiBase}/cleanup-requests/${cleanupId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(changes)
+      });
+      if (response.ok) return await response.json();
+    } catch { /* best-effort */ }
+    return null;
+  }
+
+  async function loadCleanupRequests(incidentId) {
+    if (!remote) return [];
+    try {
+      const response = await fetch(`${apiBase}/incidents/${encodeURIComponent(incidentId)}/cleanup-request`);
+      if (response.ok) {
+        const body = await response.json();
+        return Array.isArray(body.items) ? body.items : [];
+      }
+    } catch { /* best-effort */ }
+    return [];
+  }
+
   async function seed(records) {
     if (remote) {
       for (const record of records) {
@@ -95,5 +133,6 @@ export function createStorage(apiBase = CONFIG.apiBase) {
     window.localStorage.removeItem(CONFIG.storageKey);
   }
 
-  return { check, load, upsert, recordDecision, seed, clear, isRemote: () => remote };
+  return { check, load, upsert, recordDecision, requestCleanup, updateCleanupRequest,
+    loadCleanupRequests, seed, clear, isRemote: () => remote };
 }

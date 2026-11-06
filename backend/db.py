@@ -43,6 +43,15 @@ def init_db():
                 reviewed_plate TEXT,
                 created_at     TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS cleanup_requests (
+                id             INTEGER PRIMARY KEY AUTOINCREMENT,
+                incident_id    TEXT NOT NULL,
+                status         TEXT NOT NULL DEFAULT 'requested',
+                assigned_to    TEXT,
+                requested_at   TEXT NOT NULL,
+                completed_at   TEXT,
+                FOREIGN KEY (incident_id) REFERENCES incidents(id)
+            );
             CREATE TABLE IF NOT EXISTS audit_events (
                 id           INTEGER PRIMARY KEY AUTOINCREMENT,
                 actor_id     TEXT,
@@ -140,6 +149,7 @@ def delete_all_incidents():
         count = conn.execute('SELECT COUNT(*) FROM incidents').fetchone()[0]
         conn.execute('DELETE FROM incidents')
         conn.execute('DELETE FROM decisions')
+        conn.execute('DELETE FROM cleanup_requests')
         add_audit(conn, actor='demo', entity_id='*', action='CLEAR',
                   old_json=json.dumps({'deleted': count}), new_json=None)
 
@@ -177,6 +187,60 @@ def get_decisions(incident_id):
             FROM decisions WHERE incident_id = ? ORDER BY id
         ''', (incident_id,)).fetchall()
     return [dict(row) for row in rows]
+
+
+def add_cleanup_request(incident_id, assigned_to=None):
+    """Create a cleanup request for an incident. Returns the new row dict."""
+    with connection() as conn:
+        incident = conn.execute('SELECT id FROM incidents WHERE id = ?', (incident_id,)).fetchone()
+        if incident is None:
+            return None
+        now = _now()
+        cur = conn.execute('''\n            INSERT INTO cleanup_requests (incident_id, status, assigned_to, requested_at, completed_at)\n            VALUES (?, ?, ?, ?, NULL)\n        ''', (incident_id, 'requested', assigned_to, now))
+        conn.execute('''\n            INSERT INTO audit_events (actor_id, entity_type, entity_id, action, old_json, new_json, created_at)\n            VALUES (?, ?, ?, ?, ?, ?, ?)\n        ''', ('demo', 'incident', incident_id, 'CLEANUP_REQUESTED', None,
+               json.dumps({'assigned_to': assigned_to}), now))
+        row = conn.execute('SELECT * FROM cleanup_requests WHERE id = ?', (cur.lastrowid,)).fetchone()
+    return dict(row)
+
+
+def get_cleanup_request(cleanup_id):
+    with connection() as conn:
+        row = conn.execute('SELECT * FROM cleanup_requests WHERE id = ?', (cleanup_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def get_cleanup_requests(incident_id=None):
+    query = 'SELECT * FROM cleanup_requests'
+    params = []
+    if incident_id is not None:
+        query += ' WHERE incident_id = ?'
+        params.append(incident_id)
+    query += ' ORDER BY id DESC'
+    with connection() as conn:
+        return [dict(row) for row in conn.execute(query, params)]
+
+
+def update_cleanup_request(cleanup_id, changes):
+    with connection() as conn:
+        row = conn.execute('SELECT * FROM cleanup_requests WHERE id = ?', (cleanup_id,)).fetchone()
+        if row is None:
+            return None
+        current = dict(row)
+        current.update(changes)
+        if current.get('status') == 'completed' and not current.get('completed_at'):
+            current['completed_at'] = _now()
+        conn.execute('''\n            UPDATE cleanup_requests\n            SET status = ?, assigned_to = ?, completed_at = ?\n            WHERE id = ?\n        ''', (current['status'], current.get('assigned_to'), current.get('completed_at'), cleanup_id))
+        conn.execute('''\n            INSERT INTO audit_events (actor_id, entity_type, entity_id, action, old_json, new_json, created_at)\n            VALUES (?, ?, ?, ?, ?, ?, ?)\n        ''', ('demo', 'cleanup_request', str(cleanup_id), 'UPDATE',
+               json.dumps({k: current.get(k) for k in ('status', 'assigned_to', 'completed_at') if k != 'completed_at' or current.get('completed_at')}),
+               json.dumps({k: current.get(k) for k in ('status', 'assigned_to', 'completed_at')}), _now()))
+        return current
+
+
+def delete_all_cleanup_requests():
+    with connection() as conn:
+        count = conn.execute('SELECT COUNT(*) FROM cleanup_requests').fetchone()[0]
+        conn.execute('DELETE FROM cleanup_requests')
+    return count
 
 
 def priority_score(frequency, repeat, pending_cleanup, isolation=1):
