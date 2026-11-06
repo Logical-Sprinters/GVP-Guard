@@ -51,7 +51,7 @@ Use UUIDs, ISO-8601 UTC timestamps, pagination, role checks, validation, idempot
 
 `backend/app.py` now serves this API on the same origin as the static app:
 
-- Implemented: `GET /health`; `GET`, `POST`, `DELETE /incidents`; `GET`, `PATCH /incidents/{id}`; `POST /incidents/{id}/decision`; `POST /incidents/{id}/cleanup-request`; `GET /incidents/{id}/cleanup-request`; `GET /cleanup-requests`; `PATCH /cleanup-requests/{id}`; `GET /incidents/{id}/audit`; `GET /incidents/{id}/export`; `GET /gvps`; `GET /analytics/summary`.
-- Still draft: cameras/zones, analysis jobs, events, evidence upload/download, authentication and role checks, pagination, idempotency keys and consistent error envelopes.
+- Implemented: `GET /health`; `GET`, `POST`, `DELETE /incidents`; `GET`, `PATCH /incidents/{id}`; `POST /incidents/{id}/decision`; `POST /incidents/{id}/cleanup-request`; `GET /incidents/{id}/cleanup-request`; `GET /cleanup-requests`; `PATCH /cleanup-requests/{id}`; `GET /incidents/{id}/evidence`; `GET /evidence/{incident_id}/{frame}`; `GET /incidents/{id}/audit`; `GET /incidents/{id}/export`; `GET /gvps`; `GET /analytics/summary`.
+- Still draft: cameras/zones, analysis jobs, events, authentication and role checks, pagination, idempotency keys and consistent error envelopes.
 
 See [`../backend/README.md`](../backend/README.md) for run instructions.

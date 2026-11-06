@@ -516,6 +516,31 @@ function wireEvents() {
     setTimeout(() => URL.revokeObjectURL(anchor.href), 1000);
   };
 
+  async function downloadEvidenceFrame(frame) {
+    if (!state.incident) { alert('Generate and review an incident first.'); return; }
+    const blob = await storage.downloadEvidence(state.incident.id, frame);
+    if (blob) {
+      const anchor = document.createElement('a');
+      anchor.href = URL.createObjectURL(blob);
+      anchor.download = `${state.incident.id}-${frame}.jpg`;
+      anchor.click();
+      setTimeout(() => URL.revokeObjectURL(anchor.href), 1000);
+    } else {
+      // Offline fallback: download from the canvas data URL already rendered
+      const canvas = $('c' + ({ before: 1, during: 2, after: 3 }[frame]));
+      if (canvas && canvas.toDataURL) {
+        const anchor = document.createElement('a');
+        anchor.href = canvas.toDataURL('image/jpeg', 0.6);
+        anchor.download = `${state.incident.id}-${frame}.jpg`;
+        anchor.click();
+      }
+    }
+  }
+
+  $('dlBefore').onclick = () => downloadEvidenceFrame('before');
+  $('dlDuring').onclick = () => downloadEvidenceFrame('during');
+  $('dlAfter').onclick = () => downloadEvidenceFrame('after');
+
   $('seedHistory').onclick = seedHistory;
   $('clearHistory').onclick = clearHistory;
 

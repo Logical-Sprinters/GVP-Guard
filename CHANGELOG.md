@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.0] — Evidence download & release (2026-11-06)
+
+### Added
+- `backend/app.py`: `GET /incidents/{id}/evidence` (return evidence frames) and `GET /evidence/{incident_id}/{frame}` (download individual before/during/after frame as JPEG)
+- `assets/js/storage.js`: `getEvidence`, `downloadEvidence` methods
+- `assets/js/app.js`: per-frame evidence download buttons (before/during/after) with offline canvas fallback
+- `index.html`: Download button under each evidence canvas
+- Tagged release `v0.3.0`
+- `backend/test_db.py`: 10 tests (5 original + 5 cleanup-request), all pass
+- `tests/core.test.js`: 11 tests, all pass
+
+### Changed
+- `docs/06_API_SPEC.md`: evidence endpoints marked implemented
+- `docs/15_IMPLEMENTATION_STATUS.md`: evidence download added to "Working now" table; demonstration evidence marked complete in Definition of Done
+
 ## [0.2.3] — Cleanup-request workflow (2026-11-06)
 
 ### Added
