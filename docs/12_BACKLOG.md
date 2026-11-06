@@ -5,6 +5,7 @@
 - Add repository structure and environment setup
 - Add issue templates and coding standards
 - Preserve current demo as a tagged release
+- Regenerate judge-deck slide 8 for the settled 4-role × 2-member roster (`16_TEAM_ROSTER_AND_OWNERSHIP.md`, confirmed 2026-11-06)
 
 ## P1 — Live MVP
 - Webcam input

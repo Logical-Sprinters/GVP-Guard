@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.2.1] — Team structure & documentation update (2026-11-06)
+
+Documentation-only release: the team structure is settled as **4 roles × 2 members**; no application code changed.
+
+### Added
+- `docs/16_TEAM_ROSTER_AND_OWNERSHIP.md`: confirmed roster (2026-11-06) with primary/co-owner per role, file & directory ownership map, deliverables per role, judge-Q&A ownership, hand-off convention, and the superseded judge-deck slide-8 layout preserved as a historical record
+- `docs/14_TEAM_WORKFLOW.md`: 2-per-role rule, per-role responsibilities and deliverables, RACI matrix, backup & escalation path, expanded Definition of Ready / Definition of Done, weekly rhythm, Git workflow for the org's protected `master`, and the communication rule
+- `README.md`: "Team at a glance" 4×2 table, status-at-a-glance matrix, how-it-works pipeline, full documentation map for all sixteen docs, and a Node.js 22+ note for the jsdom suite (verified: 14/14 JS tests on Node 22, 5/5 Python tests)
+- `docs/hackathon/JUDGE_QA.md`: role-ownership table for the six canonical questions (answers unchanged, verbatim)
+- `docs/12_BACKLOG.md`: P0 item to regenerate judge-deck slide 8 for the settled roster
+
+### Changed
+- `README.md` rebuilt: identity table with the org repository URL, problem/team/institution/challenge facts, core rule, quick start (both run modes), tests, repository layout, docs map, claim discipline and branch notes
+- `docs/hackathon/SUBMISSION_BRIEF.md`: eight-row one-person-per-role roster replaced with the 4-role × 2 table; slide 8 flagged for regeneration (not silently rewritten)
+- `CONTRIBUTING.md`: "one cross-pair review" → "one review from a member of **another role**"; branch guidance now names protected `master`; roster-change convention added
+- `docs/README.md`: doc 16 added to the reading-order table, by-theme list and conventions; doc 14 description updated; watchlist item 5 (team roster) marked RESOLVED; item 4 (branch policy) wording updated to match the corrected docs
+- `docs/15_IMPLEMENTATION_STATUS.md`: open decisions record that the team structure is settled (2026-11-06) and that step 4 (detection/ANPR) remains deferred
+- `package.json` / `package-lock.json`: version metadata bumped to 0.2.1 (dev tooling only — the app has no runtime dependencies)
+
+### Fixed
+- Removed the stale "Four pairs / eight individual roles" wording and the protected-`main` assumption from `docs/14_TEAM_WORKFLOW.md`
+
+### Known limitations
+- The handbook and judge-deck PDFs are not committed; slide 8 still shows the older one-person-per-role layout until it is regenerated
+- The Team Lead (Omkar Solat) now sits in the AI/Vision/Data pair while handbook/deck list him as "Team Lead & Integration" — the contradiction is flagged in `docs/14`/`docs/16`, not silently resolved
+- Step 4 (YOLO/ByteTrack vehicle detection + multi-frame ANPR) remains deferred pending model weights, a controlled dataset and benchmarking
+- All MVP-1 limitations from 0.2.0 still apply (see `docs/15_IMPLEMENTATION_STATUS.md`)
+
 ## [0.2.0] — MVP-1 technical proof (2026-11-05)
 
 ### Added

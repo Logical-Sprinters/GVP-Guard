@@ -19,15 +19,17 @@ Canonical project documentation for GVP-Guard: NightEye AI. The numbered files a
 | 11 | [Development Roadmap](11_DEVELOPMENT_ROADMAP.md) | Phases 0–6 and expansion gate |
 | 12 | [Prioritized Backlog](12_BACKLOG.md) | P0–P5 work items and issue template rule |
 | 13 | [Demo & Acceptance Plan](13_DEMO_AND_ACCEPTANCE.md) | Controlled/live demo script, honesty rules, release checklist |
-| 14 | [Team Workflow & Ownership](14_TEAM_WORKFLOW.md) | Four pairs, eight roles, Git workflow, definitions |
+| 14 | [Team Workflow & Ownership](14_TEAM_WORKFLOW.md) | Four roles × two members, responsibilities, RACI, backup/escalation, DoR/DoD, weekly rhythm, Git workflow for protected `master` |
 | 15 | [Implementation Status](15_IMPLEMENTATION_STATUS.md) | What code exists today, test commands, open decisions |
+| 16 | [Team Roster & Ownership](16_TEAM_ROSTER_AND_OWNERSHIP.md) | Confirmed roster (2026-11-06), primary/co-owner per role, file & directory ownership, deliverables, judge-Q&A owners, hand-off convention |
 
 ## By theme
 
 - **Product & scope:** 01, 03
 - **Architecture & engineering:** 02, 04, 05, 06, 07
 - **Quality, security & operations:** 08, 09, 10
-- **Planning & delivery:** 11, 12, 13, 14
+- **Planning & delivery:** 11, 12, 13
+- **Team & governance:** 14, 16
 - **Implementation ledger:** 15, [backend/README.md](../backend/README.md)
 - **Hackathon submission:** [SUBMISSION_BRIEF.md](hackathon/SUBMISSION_BRIEF.md), [JUDGE_QA.md](hackathon/JUDGE_QA.md)
 - **Repository governance:** root [README.md](../README.md), [CONTRIBUTING.md](../CONTRIBUTING.md), [CHANGELOG.md](../CHANGELOG.md)
@@ -58,8 +60,8 @@ These are mismatches found while consolidating the attachments. They are recorde
 1. **Status labels (partly resolved):** `assets/js/core.js` now defines the canonical `STATUS` enum from `02_SYSTEM_ARCHITECTURE.md` and every incident stores a `statusCode`. Display text still uses "Probable dumping" / "Ambiguous" / "REVIEW REQUIRED", so the UI and deck wording must still be frozen against the enum. `12_BACKLOG.md` P0 remains open.
 2. **Roadmaps:** `11_DEVELOPMENT_ROADMAP.md` (phases 0–6), the handbook (5 stages) and the judge deck (NOW / 0–3 / 3–6 / 6–12 months) describe the same plan at different granularity. Reconcile before the final-round presentation so all eight members quote one timeline.
 3. **PRD vs reality:** `01_PRODUCT_REQUIREMENTS.md` lists requirements without a status column; readers must cross-check the status matrix above before assuming anything is implemented.
-4. **Branch policy:** the original `CONTRIBUTING.md` and `14_TEAM_WORKFLOW.md` assume a protected `main`, but `main` currently contains only a placeholder README while `master` holds the demo. Confirm the long-term base branch with the team.
-5. **Team roster:** `14_TEAM_WORKFLOW.md` lists eight roles (four pairs) without names; the judge deck names all eight members. Names are captured in `hackathon/SUBMISSION_BRIEF.md`.
+4. **Branch policy (docs corrected, decision open):** `CONTRIBUTING.md` and `14_TEAM_WORKFLOW.md` now name protected `master` as the development base (updated 2026-11-06), but `main` is still GitHub's default branch and holds only a placeholder README. Confirm the long-term base branch with the team, then either switch the default branch or fold `master` into `main`.
+5. **Team roster (RESOLVED 2026-11-06):** the team structure is settled as **4 roles × 2 members**; named assignments, file ownership and judge-Q&A owners live in `16_TEAM_ROSTER_AND_OWNERSHIP.md`, the workflow in `14_TEAM_WORKFLOW.md`, and the same roster table is mirrored in `hackathon/SUBMISSION_BRIEF.md`. Remaining follow-up: judge-deck slide 8 and the handbook still show the older one-person-per-role layout and must be regenerated (P0 in `12_BACKLOG.md`) — flagged, not silently rewritten. Omkar Solat keeps the Team Lead title (per handbook/deck) while sitting in the AI/Vision/Data pair; the title is kept separate from the Integration/Testing pair (Prince Rana + Sayantani Mandal).
 6. **Demo hygiene (resolved for code):** injected Cloudflare scripts removed, history rows DOM-escaped, seeded records flagged `DEMO`, object URLs revoked, seek timeout added, heuristic score labelled as uncalibrated, and map counts now derive from real records. The fixed 8% threshold remains a labelled heuristic (MVP-2 replaces it); display wording is tracked in item 1.
 7. **Binary artifacts:** the 16-page A4 handbook and the 8-slide judge-ready PDF are not committed; their canonical facts are mirrored in `hackathon/*.md`.
 8. **Repo scaffolding (partly resolved):** `.gitignore`, `package.json`, a JS + Python test harness and `backend/requirements.txt` now exist. Issue templates, coding standards and LICENSE are still P0 items in `12_BACKLOG.md`.
@@ -69,4 +71,5 @@ These are mismatches found while consolidating the attachments. They are recorde
 - Numbered `docs/NN_*.md` files are canonical; edit in place, never renumber, and keep the numeric order meaningful.
 - Draft documents are labelled "Draft" in their own title (06, 07, 10); proposed stacks are labelled "Proposed" (04).
 - Add new documents to the tables above and record user-visible changes in `CHANGELOG.md`.
+- Team, roster and ownership changes are recorded in `16_TEAM_ROSTER_AND_OWNERSHIP.md` via a PR approved by the Team Lead; the judge-facing docs (`14`, `16`, `hackathon/*`) must stay in sync with each other.
 - Treat real-world claims (GMC permissions, field accuracy, legal admissibility) as requiring explicit evidence and authorization.
