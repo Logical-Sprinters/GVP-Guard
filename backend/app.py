@@ -15,7 +15,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from . import db
-from .schemas import DecisionIn, IncidentIn
+from .schemas import CleanupRequestIn, CleanupRequestUpdate, DecisionIn, IncidentIn
 
 ROOT = Path(__file__).resolve().parent.parent
 API = '/api/v1'
@@ -88,13 +88,36 @@ def update_incident(incident_id: str, changes: dict):
     return incident
 
 
-@app.post(API + '/incidents/{incident_id}/decision')
-def record_decision(incident_id: str, decision: DecisionIn):
+@app.post(API + '/incidents/{incident_id}/cleanup-request')
+def create_cleanup_request(incident_id: str, req: CleanupRequestIn):
     if db.get_incident(incident_id) is None:
         raise HTTPException(status_code=404, detail='Incident not found')
-    db.add_decision(incident_id, decision.decision, decision.reviewer,
-                    decision.comment or '', decision.reviewedPlate)
-    return {'ok': True, 'incidentId': incident_id, 'decision': decision.decision}
+    row = db.add_cleanup_request(incident_id, assigned_to=req.assigned_to)
+    if row is None:
+        raise HTTPException(status_code=404, detail='Incident not found')
+    return {'ok': True, 'cleanupRequestId': row['id'], 'status': row['status'],
+            'assignedTo': row['assigned_to'], 'requestedAt': row['requested_at']}
+
+
+@app.get(API + '/incidents/{incident_id}/cleanup-request')
+def read_cleanup_requests(incident_id: str):
+    if db.get_incident(incident_id) is None:
+        raise HTTPException(status_code=404, detail='Incident not found')
+    return {'items': db.get_cleanup_requests(incident_id)}
+
+
+@app.get(API + '/cleanup-requests')
+def list_cleanup_requests():
+    return {'items': db.get_cleanup_requests()}
+
+
+@app.patch(API + '/cleanup-requests/{cleanup_id}')
+def update_cleanup_request(cleanup_id: int, changes: CleanupRequestUpdate):
+    row = db.update_cleanup_request(cleanup_id, changes.model_dump(exclude_unset=True))
+    if row is None:
+        raise HTTPException(status_code=404, detail='Cleanup request not found')
+    return {'ok': True, 'cleanupRequestId': row['id'], 'status': row['status'],
+            'assignedTo': row['assigned_to'], 'completedAt': row['completed_at']}
 
 
 @app.get(API + '/incidents/{incident_id}/audit')

@@ -75,6 +75,8 @@ function resetIncidentUI(clearSource) {
   $('location').textContent = $('zoneSelect').value;
   $('note').textContent = 'Human review is mandatory before any enforcement action.';
   state.incident = null;
+  state.cleanup = { id: null, status: null, assignee: null, requestedAt: null };
+  $('cleanupSection').style.display = 'none';
 
   if (clearSource) {
     monitor.stop();
@@ -154,7 +156,10 @@ function createIncident({ diff, frames, source, stableFor = null }) {
     paintFrame($('c3'), frames.after);
   }
   // Persist pending incidents too; the earlier demo only saved after a decision.
-  storage.upsert(incident).then(refreshHistory).catch(() => {});
+  storage.upsert(incident).then(async () => {
+    await refreshHistory();
+    await loadCleanupSection();
+  }).catch(() => {});
 }
 
 async function runAnalysis() {
@@ -212,6 +217,76 @@ async function decide(action) {
     comment: incident.comment, reviewedPlate: incident.plate
   });
   await refreshHistory();
+  await loadCleanupSection();
+}
+
+/* --------------------------- Cleanup Request --------------------------- */
+
+state.cleanup = { id: null, status: null, assignee: null, requestedAt: null };
+
+async function loadCleanupSection() {
+  if (!state.incident) {
+    $('cleanupSection').style.display = 'none';
+    return;
+  }
+  const requests = await storage.loadCleanupRequests(state.incident.id);
+  if (requests.length === 0) {
+    $('cleanupSection').style.display = state.incident.decision === 'Cleanup requested' ? 'block' : 'none';
+    $('cleanupStatus').textContent = '—';
+    $('cleanupAssignee').textContent = '—';
+    $('cleanupRequestedAt').textContent = '—';
+    return;
+  }
+  const latest = requests[0];
+  state.cleanup.id = latest.id;
+  state.cleanup.status = latest.status;
+  state.cleanup.assignee = latest.assigned_to;
+  state.cleanup.requestedAt = latest.requested_at;
+  $('cleanupSection').style.display = 'block';
+  $('cleanupStatus').textContent = latest.status;
+  $('cleanupAssignee').textContent = latest.assigned_to || 'Unassigned';
+  $('cleanupRequestedAt').textContent = latest.requested_at;
+  $('cleanupRequest').disabled = latest.status === 'completed';
+  $('cleanupComplete').disabled = latest.status !== 'requested';
+}
+
+async function requestCleanup() {
+  if (!state.incident) return;
+  const assignee = $('cleanupAssigneeInput').value.trim() || null;
+  const result = await storage.requestCleanup(state.incident.id, assignee);
+  if (result) {
+    state.cleanup.id = result.cleanupRequestId;
+    state.cleanup.status = result.status;
+    state.cleanup.assignee = result.assignedTo;
+    state.cleanup.requestedAt = result.requestedAt;
+    $('cleanupStatus').textContent = result.status;
+    $('cleanupAssignee').textContent = result.assignedTo || 'Unassigned';
+    $('cleanupRequestedAt').textContent = result.requestedAt;
+    $('cleanupRequest').disabled = true;
+    $('cleanupComplete').disabled = false;
+    $('note').textContent = `Cleanup requested${result.assignedTo ? ' for ' + result.assignedTo : ''}. Officer confirmation required.`;
+    await refreshHistory();
+  } else {
+    $('note').textContent = 'Cleanup request recorded locally (API unavailable).';
+  }
+}
+
+async function completeCleanup() {
+  if (!state.cleanup.id) return;
+  const result = await storage.updateCleanupRequest(state.cleanup.id, { status: 'completed' });
+  if (result) {
+    state.cleanup.status = result.status;
+    $('cleanupStatus').textContent = result.status;
+    $('cleanupComplete').disabled = true;
+    $('note').textContent = 'Cleanup marked complete.';
+    await refreshHistory();
+  }
+}
+
+function cancelCleanup() {
+  $('cleanupSection').style.display = 'none';
+  state.cleanup = { id: null, status: null, assignee: null, requestedAt: null };
+  $('note').textContent = 'Cleanup request closed.';
 }
 
 /* -------------------------------- History -------------------------------- */
@@ -420,6 +495,9 @@ function wireEvents() {
   $('decideApprove').onclick = () => decide('Approved for follow-up');
   $('decideReject').onclick = () => decide('Rejected — insufficient evidence');
   $('decideCleanup').onclick = () => decide('Cleanup requested');
+  $('cleanupRequest').onclick = requestCleanup;
+  $('cleanupComplete').onclick = completeCleanup;
+  $('cleanupCancel').onclick = cancelCleanup;
 
   $('plateEdit').oninput = () => {
     const value = $('plateEdit').value.trim();

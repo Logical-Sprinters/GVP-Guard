@@ -46,4 +46,4 @@ Database stores metadata and opaque object keys. Clips/images remain in controll
 
 ## Implementation status (2026-11-05)
 
-Only `incidents`, `decisions` and `audit_events` exist in the SQLite prototype (`backend/db.py`). Evidence frames are stored as JPEG data URLs inside the incident payload — there is no object storage, signed URL, checksum or chain-of-custody implementation. `cameras`, `gvp_zones`, `analysis_jobs`, `tracks`, `vehicles`, `evidence_items` and `cleanup_requests` remain draft. Immutable audit enforcement and retention/expiration jobs are not implemented.
+`incidents`, `decisions`, `audit_events` and `cleanup_requests` exist in the SQLite prototype (`backend/db.py`). Evidence frames are stored as JPEG data URLs inside the incident payload — there is no object storage, signed URL, checksum or chain-of-custody implementation. `cameras`, `gvp_zones`, `analysis_jobs`, `tracks`, `vehicles` and `evidence_items` remain draft. Immutable audit enforcement and retention/expiration jobs are not implemented.

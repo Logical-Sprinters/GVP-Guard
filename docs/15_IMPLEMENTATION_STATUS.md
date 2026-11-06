@@ -42,6 +42,7 @@ package.json                   # dev-only test tooling (the app has no runtime d
 | Before/during/after frames with real pixels | `evidence.js`, `app.js` | JPEG data URLs embedded in the JSON report |
 | Incident record | `app.js`, `core.js` | Canonical `statusCode`, `triggerReasons`, `reviewer`, `comment`, `reviewedAt`, `source` |
 | Officer approve / reject / cleanup | `app.js` | Writes incident + decision + audit row |
+| Cleanup-request workflow | `backend/app.py`, `backend/db.py`, `app.js` | `POST /incidents/{id}/cleanup-request`, `GET /incidents/{id}/cleanup-request`, `GET /cleanup-requests`, `PATCH /cleanup-requests/{id}`; SQLite `cleanup_requests` table; UI request/complete flow |
 | Dual-mode persistence | `storage.js` | `localStorage` offline; FastAPI + SQLite via **relative** `/api/v1` URLs when available |
 | API endpoints | `backend/app.py` | health, incidents CRUD-ish, decisions, audit, export, GVPs, summary |
 | Transparent GVP priority score | `core.js`, `db.py` | Fixed published weights; capped at 100; not a prediction model |
