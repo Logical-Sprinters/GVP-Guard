@@ -71,7 +71,7 @@ Primary = role accountable for the path; co-owner = role consulted on changes an
 ### Frontend / UI / UX — Janed Patel + Smeet Jariwala
 - **Merged / working:** 4-tab semantic shell with no external scripts/fonts/network calls; recorded-file **and** live-webcam input with object-URL cleanup and seek timeout; editable normalised GVP polygon (add/drag vertices, save/reset); history with DOM-escaped fields (XSS fix); reviewer/comment fields; approve/reject/cleanup decision UI; dynamic GVP map counts; JSON export view; demo-stage overlays (CSS tracking box, editable plate candidate) clearly labelled as demo-stage.
 - **Documentation:** demo UI flow inside `docs/13` (shared with Integration / Testing).
-- **Planned:** freeze display labels ("Probable dumping" / "Ambiguous" / "REVIEW REQUIRED") against the canonical `STATUS` enum — watchlist item 1, owned jointly with AI/Vision/Data and Backend; officer-dashboard hardening; accessibility; live CCTV view once RTSP input exists.
+- **Planned:** officer-dashboard hardening; accessibility; live CCTV view once RTSP input exists. (Display labels frozen against the canonical `STATUS` enum — watchlist item 1 resolved 2026-11-06.)
 
 ### Integration / Testing — Prince Rana + Sayantani Mandal
 - **Merged / working:** `tests/core.test.js` + `tests/ui.test.js` (14 JS tests total: pure logic, offline boot, XSS-safe rendering, API-mode detection); green-run discipline for `python3 -m unittest backend.test_db -v` (5 tests); dual run-mode verification (offline static + full API); `docs/15_IMPLEMENTATION_STATUS.md` code ledger; release acceptance checklist and demo script with recorded fallback for every live step (`docs/13`).

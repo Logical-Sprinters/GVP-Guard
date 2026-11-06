@@ -95,7 +95,7 @@ export function classify(diff, threshold = 8) {
   const probable = diff >= threshold;
   return {
     probable,
-    status: probable ? 'Probable dumping' : 'Ambiguous',
+    status: probable ? STATUS.SUSPICIOUS : STATUS.CANDIDATE,
     triggerReasons: probable
       ? ['Zone scene change', 'Scene stabilised after change']
       : ['Limited zone scene change', 'Manual review required']

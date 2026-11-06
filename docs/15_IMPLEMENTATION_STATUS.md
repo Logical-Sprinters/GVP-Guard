@@ -51,7 +51,7 @@ package.json                   # dev-only test tooling (the app has no runtime d
 
 Vehicle detection, tracking IDs, a vehicle stop timer, a dumping-event model, person/object-transfer cues, plate detection, multi-frame OCR/ANPR, confidence calibration, authentication, roles, rate limiting, object storage, signed evidence URLs, malware scanning, retention/deletion jobs, checksums or chain of custody, live CCTV/RTSP, official GMC/registry/e-challan integration, field validation, and any measured accuracy, false-alert or impact figure.
 
-The UI still uses the display labels `Probable dumping` / `Ambiguous`, produced by a fixed 8% zone-diff threshold and an uncalibrated illustrative cue score. Canonical enum codes are stored in `statusCode`; see the open decisions below.
+The UI now uses canonical `STATUS` codes (`SUSPICIOUS` / `CANDIDATE`) from `classify()` and renders them via `STATUS_LABEL`. Canonical enum codes are stored in `statusCode`. The fixed 8% zone-diff threshold and illustrative cue score remain uncalibrated heuristics (labelled as such).
 
 ## Definition of Done check (`03_MVP_SCOPE.md`)
 
@@ -83,7 +83,7 @@ python3 -m unittest backend.test_db -v
 
 ## Open decisions (from `docs/README.md` watchlist)
 
-1. **Status labels:** freeze display labels against the canonical `STATUS` enum before the final-round deck/UI is produced.
+1. **Status labels (RESOLVED 2026-11-06):** `classify()` now returns canonical `STATUS` codes (`SUSPICIOUS` / `CANDIDATE`) instead of hardcoded 'Probable dumping' / 'Ambiguous' strings. UI displays use `STATUS_LABEL` from `core.js`; the history table renders `STATUS_LABEL[x.status]`. Demo seed records use canonical codes. Display wording is consistent with the canonical enum.
 2. **Roadmap granularity:** reconcile phases 0–6 (`11`), 5 handbook stages, and the 4-step judge-deck timeline.
 3. **Branch policy:** `main` is still a placeholder README; `master` holds the code. Confirm the long-term base.
 4. **Demo hygiene:** the fabricated cue score and fixed threshold are now labelled as heuristics; replacing them with measured cues is MVP-2 work.

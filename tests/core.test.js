@@ -61,9 +61,9 @@ test('cueScore is bounded and never negative', () => {
   assert.ok(cueScore(30) > cueScore(10));
 });
 
-test('classify applies the documented heuristic threshold', () => {
-  assert.equal(classify(8, 8).status, 'Probable dumping');
-  assert.equal(classify(7.9, 8).status, 'Ambiguous');
+test('classify returns canonical STATUS codes against the threshold', () => {
+  assert.equal(classify(8, 8).status, STATUS.SUSPICIOUS);
+  assert.equal(classify(7.9, 8).status, STATUS.CANDIDATE);
   assert.deepEqual(classify(8, 8).triggerReasons.length, 2);
 });
 
