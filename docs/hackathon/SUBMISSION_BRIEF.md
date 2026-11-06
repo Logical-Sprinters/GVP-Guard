@@ -43,7 +43,7 @@ Primary users: GMC chief sanitary inspectors, solid-waste management officers, m
 | 5 | Engineering stack | Four readiness blocks: video & evidence (working), AI pipeline (demo-stage), incident records (working), officer dashboard (working); dependencies |
 | 6 | Impact assessment | Cleaner locations, safer surroundings, faster review, better resource use; pilot KPIs to be measured |
 | 7 | Execution timeline | NOW → months 0–3 → 3–6 → 6–12 → validated expansion |
-| 8 | Squad capabilities | Eight named members, each with a visible deliverable |
+| 8 | Squad capabilities | Eight named members, each with a visible deliverable — *slide to be regenerated for the settled 4-role × 2 roster; see the roster note below* |
 
 ## Component readiness and dependencies
 
@@ -64,20 +64,22 @@ Primary users: GMC chief sanitary inspectors, solid-waste management officers, m
 
 No accuracy or impact percentages may be published without documented tests that state hardware, footage conditions and sample size.
 
-## Team roster (judge deck slide 8)
+## Team roster (settled 2026-11-06 — 4 roles × 2 members)
 
-| # | Member | Responsibility |
-|---|--------|----------------|
-| TL | Omkar Solat | Team Lead & Integration |
-| M2 | Prince Rana | Vehicle Detection & Tracking |
-| M3 | Sayantani Mandal | Event Logic & Data |
-| M4 | Smeet Jariwala | Dashboard & User Experience |
-| M5 | Shivansh Gupta | Backend & Evidence Records |
-| M6 | Jay Katkar | ANPR & Image Processing |
-| M7 | Janed Patel | Testing & Evaluation |
-| M8 | Prafull Mayank Singh | Video, Design & Documentation |
+The same eight members named on judge-deck slide 8, reassigned into four role streams of two:
 
-`14_TEAM_WORKFLOW.md` describes the same eight roles as four pairs (AI/vision/data, frontend/dashboard/UX, backend/database/evidence, integration/testing/presentation) without names.
+| Role | Members |
+|------|---------|
+| AI / Vision / Data | Omkar Solat *(also Team Lead)*, Prafull Mayank Singh |
+| Backend / Database / Evidence | Shivansh Gupta, Jay Katkar |
+| Frontend / UI / UX | Janed Patel, Smeet Jariwala |
+| Integration / Testing | Prince Rana, Sayantani Mandal |
+
+Omkar Solat remains **Team Lead** per the team handbook and deck cover. The Team Lead title is kept separate from the Integration/Testing pair: his working pair is AI / Vision / Data, while Integration / Testing is Prince Rana + Sayantani Mandal.
+
+> **Deck note (flagged, not silently rewritten):** slide 8 of `GVP_Guard_Judge_Ready_v2 (1).pdf` still shows the older one-person-per-role layout ("Team Lead & Integration", "Vehicle Detection & Tracking", …). It must be regenerated to show **4 streams with 2 names each** before the final round (P0 item in [../12_BACKLOG.md](../12_BACKLOG.md)). The historical slide-8 mapping is preserved in [../16_TEAM_ROSTER_AND_OWNERSHIP.md](../16_TEAM_ROSTER_AND_OWNERSHIP.md).
+
+Full roster detail, file/directory ownership, deliverables and judge-Q&A owners: [../16_TEAM_ROSTER_AND_OWNERSHIP.md](../16_TEAM_ROSTER_AND_OWNERSHIP.md). Workflow, RACI, Git rules and definitions: [../14_TEAM_WORKFLOW.md](../14_TEAM_WORKFLOW.md).
 
 ## Timeline reconciliation note
 
