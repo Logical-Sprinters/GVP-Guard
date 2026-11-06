@@ -83,7 +83,7 @@ test('static prototype boots, wires tabs, and keeps claim discipline', async () 
   window.localStorage.setItem('gvpHistory', JSON.stringify([{
     id: 'INC-XSS', time: 't', location: 'GVP-01', sceneChange: '1%',
     plate: '<img src=x onerror=alert(1)>', decision: 'Approved for follow-up',
-    status: 'Probable dumping', statusCode: 'APPROVED'
+    status: 'SUSPICIOUS', statusCode: 'APPROVED'
   }]));
   window.document.querySelector('.tab[data-view="live"]').click();
   window.document.querySelector('.tab[data-view="history"]').click();
@@ -134,7 +134,7 @@ test('API mode is detected via relative /api/v1 calls', async () => {
 
   const records = [{
     id: 'INC-API-1', time: '2026-11-05', location: 'GVP-03', sceneChange: '9.0%',
-    plate: 'Manual review', decision: 'Pending', status: 'Probable dumping',
+    plate: 'Manual review', decision: 'Pending', status: 'SUSPICIOUS',
     statusCode: 'REVIEW_REQUIRED'
   }];
   window.fetch = async (url, options = {}) => {

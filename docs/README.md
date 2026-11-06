@@ -57,7 +57,7 @@ The same distinction must be used in the docs, the deck, the demo and judge answ
 
 These are mismatches found while consolidating the attachments. They are recorded here so they are not silently changed.
 
-1. **Status labels (partly resolved):** `assets/js/core.js` now defines the canonical `STATUS` enum from `02_SYSTEM_ARCHITECTURE.md` and every incident stores a `statusCode`. Display text still uses "Probable dumping" / "Ambiguous" / "REVIEW REQUIRED", so the UI and deck wording must still be frozen against the enum. `12_BACKLOG.md` P0 remains open.
+1. **Status labels (RESOLVED 2026-11-06):** `classify()` returns canonical `STATUS` codes (`SUSPICIOUS` / `CANDIDATE`); UI displays use `STATUS_LABEL` from `core.js`; the history table renders `STATUS_LABEL[x.status]`. Watchlist item resolved — UI and deck wording now aligned with the canonical enum.
 2. **Roadmaps:** `11_DEVELOPMENT_ROADMAP.md` (phases 0–6), the handbook (5 stages) and the judge deck (NOW / 0–3 / 3–6 / 6–12 months) describe the same plan at different granularity. Reconcile before the final-round presentation so all eight members quote one timeline.
 3. **PRD vs reality:** `01_PRODUCT_REQUIREMENTS.md` lists requirements without a status column; readers must cross-check the status matrix above before assuming anything is implemented.
 4. **Branch policy (docs corrected, decision open):** `CONTRIBUTING.md` and `14_TEAM_WORKFLOW.md` now name protected `master` as the development base (updated 2026-11-06), but `main` is still GitHub's default branch and holds only a placeholder README. Confirm the long-term base branch with the team, then either switch the default branch or fold `master` into `main`.

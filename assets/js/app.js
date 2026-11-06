@@ -1,7 +1,7 @@
 import { CONFIG } from './config.js';
 import {
-  STATUS, escapeHTML, clamp, normalisePolygon, sceneDifference, cueScore,
-  classify, makeIncidentId, decisionToStatus, priorityScore, buildReport
+  STATUS, STATUS_LABEL, escapeHTML, clamp, normalisePolygon, sceneDifference,
+  cueScore, classify, makeIncidentId, decisionToStatus, priorityScore, buildReport
 } from './core.js';
 import { createCamera } from './camera.js';
 import { createZoneEditor } from './zone.js';
@@ -140,11 +140,9 @@ function createIncident({ diff, frames, source, stableFor = null }) {
   $('location').textContent = zone;
   $('decision').textContent = 'Pending';
   $('statusCode').textContent = incident.statusCode;
-  $('istatus').textContent = 'REVIEW REQUIRED';
+  $('istatus').textContent = STATUS_LABEL[STATUS.REVIEW_REQUIRED];
   $('plate').textContent = incident.plate;
-  $('alert').innerHTML = result.probable
-    ? '<strong>Probable dumping event</strong><div style="font-size:12px;margin-top:4px;color:#6c625b">Zone scene change detected by a heuristic. Officer confirmation required.</div>'
-    : '<strong>Ambiguous event</strong><div style="font-size:12px;margin-top:4px;color:#6c625b">Limited zone change. Send to manual review; do not accuse automatically.</div>';
+  $('alert').innerHTML = '<strong>' + STATUS_LABEL[result.status] + ' event</strong><div style="font-size:12px;margin-top:4px;color:#6c625b">Zone scene change detected by a heuristic. Officer confirmation required.</div>';
   $('track').style.display = 'block';
   $('trackLabel').textContent = source === 'Recorded video analysis'
     ? 'Zone scene-change overlay (heuristic)'
@@ -205,7 +203,7 @@ async function decide(action) {
   $('plate').textContent = incident.plate;
   $('decision').textContent = action;
   $('statusCode').textContent = incident.statusCode;
-  $('istatus').textContent = action.startsWith('Rejected') ? 'CLOSED' : 'ACTION RECORDED';
+  $('istatus').textContent = STATUS_LABEL[incident.statusCode];
   $('note').textContent = `${action} • recorded for ${incident.reviewer}. Review-ready incident saved.`;
 
   await storage.upsert(incident);
@@ -225,7 +223,7 @@ function renderHistory() {
   $('histCleanup').textContent = records.filter(x => x.decision === 'Cleanup requested').length;
   $('histBody').innerHTML = records.length
     ? records.map(x => `<tr>
-        <td><b>${escapeHTML(x.id)}</b>${x.demo ? ' <span class="demotag">DEMO</span>' : ''}<br><small>${escapeHTML(x.status || '')}</small></td>
+        <td><b>${escapeHTML(x.id)}</b>${x.demo ? ' <span class="demotag">DEMO</span>' : ''}<br><small>${escapeHTML(STATUS_LABEL[x.status] || x.status || '')}</small></td>
         <td>${escapeHTML(x.time)}</td><td>${escapeHTML(x.location)}</td>
         <td>${escapeHTML(x.sceneChange)}</td><td>${escapeHTML(x.plate)}</td>
         <td>${escapeHTML(x.decision)}</td>
@@ -248,9 +246,9 @@ async function refreshHistory() {
 async function seedHistory() {
   const now = Date.now();
   const sample = [
-    { id: 'INC-240381', demo: true, time: new Date(now - 86400000).toLocaleString(), location: 'GVP-01', sceneChange: '16.8%', plate: 'GJ 12 AB 4381', decision: 'Approved for follow-up', status: 'Probable dumping', statusCode: STATUS.APPROVED, source: 'Demo seed', detectionMethod: 'Sample record', evidenceFrames: null },
-    { id: 'INC-240296', demo: true, time: new Date(now - 172800000).toLocaleString(), location: 'GVP-02', sceneChange: '4.1%', plate: 'Manual review', decision: 'Rejected — insufficient evidence', status: 'Ambiguous', statusCode: STATUS.REJECTED, source: 'Demo seed', detectionMethod: 'Sample record', evidenceFrames: null },
-    { id: 'INC-240174', demo: true, time: new Date(now - 259200000).toLocaleString(), location: 'GVP-01', sceneChange: '12.4%', plate: 'GJ 05 XX 0001', decision: 'Cleanup requested', status: 'Probable dumping', statusCode: STATUS.CLEANUP_REQUESTED, source: 'Demo seed', detectionMethod: 'Sample record', evidenceFrames: null }
+    { id: 'INC-240381', demo: true, time: new Date(now - 86400000).toLocaleString(), location: 'GVP-01', sceneChange: '16.8%', plate: 'GJ 12 AB 4381', decision: 'Approved for follow-up', status: STATUS.SUSPICIOUS, statusCode: STATUS.APPROVED, source: 'Demo seed', detectionMethod: 'Sample record', evidenceFrames: null },
+    { id: 'INC-240296', demo: true, time: new Date(now - 172800000).toLocaleString(), location: 'GVP-02', sceneChange: '4.1%', plate: 'Manual review', decision: 'Rejected — insufficient evidence', status: STATUS.CANDIDATE, statusCode: STATUS.REJECTED, source: 'Demo seed', detectionMethod: 'Sample record', evidenceFrames: null },
+    { id: 'INC-240174', demo: true, time: new Date(now - 259200000).toLocaleString(), location: 'GVP-01', sceneChange: '12.4%', plate: 'GJ 05 XX 0001', decision: 'Cleanup requested', status: STATUS.SUSPICIOUS, statusCode: STATUS.CLEANUP_REQUESTED, source: 'Demo seed', detectionMethod: 'Sample record', evidenceFrames: null }
   ];
   await storage.seed(sample);
   await refreshHistory();

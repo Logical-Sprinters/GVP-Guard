@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.2] — Status labels frozen to canonical STATUS enum (2026-11-06)
+
+### Changed
+- `assets/js/core.js`: `classify()` returns canonical `STATUS` codes (`SUSPICIOUS` / `CANDIDATE`) instead of hardcoded 'Probable dumping' / 'Ambiguous' strings
+- `assets/js/app.js`: UI displays render via `STATUS_LABEL`; history table renders `STATUS_LABEL[x.status]`; decide flow shows `STATUS_LABEL[incident.statusCode]`; demo seed records use canonical codes
+- `tests/core.test.js`: classify test asserts canonical STATUS codes
+- `tests/ui.test.js`: demo/API fixtures use canonical `SUSPICIOUS` status
+- `docs/15_IMPLEMENTATION_STATUS.md`: watchlist item 1 marked RESOLVED; UI label description updated
+- `docs/README.md`: watchlist item 1 marked RESOLVED
+- `docs/16_TEAM_ROSTER_AND_OWNERSHIP.md`: frontend planned work updated (label freeze done)
+
 ## [0.2.1] — Team structure & documentation update (2026-11-06)
 
 Documentation-only release: the team structure is settled as **4 roles × 2 members**; no application code changed.
