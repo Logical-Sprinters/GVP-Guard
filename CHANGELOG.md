@@ -1,8 +1,21 @@
 # Changelog
 
-## [0.3.1] — Step 4 readiness planning (2026-11-06)
+## [0.3.2] — Step 4 readiness tooling (2026-11-07)
 
-Documentation-only release: defines the prerequisites that must be met before Step 4 (vehicle detection + multi-frame ANPR) can begin. No application code changed; Step 4 remains deferred.
+Concrete tools and documented sources for all three Step 4 prerequisites. No application code changed; Step 4 remains deferred.
+
+### Added
+- `tools/download_weights.py` — exact download URLs for YOLO11n/yolo11s pretrained weights (official Ultralytics CDN + Hugging Face mirrors)
+- `tools/benchmark_detection.py` — runs detection benchmark, outputs `benchmark_results.json` with FPS, latency, per-class counts (metrics per docs/05)
+- `tools/requirements.txt` — ultralytics, opencv-python, easyocr, numpy, Pillow
+- `tools/dataset_acquisition.md` — exact dataset URLs: Indian Truck License Plates (Kaggle/HF), Indian Number Plates (HF), VisionPlate_ANPR (IEEE Dataport), Roboflow Indian Number Plate, ANPR 2, COCO val2017
+- `tools/README.md` — quick start and go/no-go checklist
+
+### Changed
+- `docs/12_BACKLOG.md` — P0 Step 4 readiness item references the concrete tools
+- `CHANGELOG.md` — this entry
+
+## [0.3.1] — Step 4 readiness planning (2026-11-06)
 
 ### Added
 - `docs/STEP4_READINESS_PLAN.md`: model weights acquisition plan (YOLO11n/ByteTrack/OCR), controlled dataset collection protocol (permitted site, lighting conditions, positive/negative scenarios, annotation schema, dataset split, minimum sample sizes), benchmarking plan (metrics, targets, hardware to record, go/no-go criteria)
