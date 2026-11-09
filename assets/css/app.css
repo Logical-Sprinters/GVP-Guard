@@ -14,6 +14,7 @@
 .monitorbar .btn:disabled,.sourcebar .btn:disabled{opacity:.45;cursor:not-allowed}
 .livebadge{font-size:10px;font-weight:bold;padding:5px 8px;border-radius:12px;background:#f2f6f7;color:#6a7d86;white-space:nowrap}
 .livebadge.on{background:#def5eb;color:#08714e}
+.btn.on{background:#def5eb;color:#08714e}
 .livebadge.off{background:#fff0df;color:#ad4a0a}
 .demotag{font-size:10px;background:#fff0df;color:#ad4a0a;padding:3px 6px;border-radius:10px;margin-left:5px;font-weight:bold;white-space:nowrap}
 .statuscode{font-family:monospace;font-size:11px;background:#eef4f6;padding:2px 6px;border-radius:5px;color:#244956}

@@ -8,6 +8,7 @@ import { createZoneEditor } from './zone.js';
 import { createEvidenceBuffer, paintFrame, clearCanvas } from './evidence.js';
 import { createMonitor } from './monitor.js';
 import { createStorage } from './storage.js';
+import { createVehicleDetector, createStopTimer } from './vehicle-detection.js';
 
 const $ = id => document.getElementById(id);
 const video = $('vid');
@@ -30,6 +31,99 @@ const state = {
   mapZone: 'GVP-01',
   mapRisk: 'High'
 };
+
+/* ------------------------------- Vehicle AI (DEMO STAGE) ------------------------------- */
+
+let vehicleDetector = null;
+let stopTimer = null;
+let vehicleAIActive = false;
+let lastDetections = [];
+let lastStopped = [];
+let lastPlate = null;
+let lastDumpingCue = false;
+
+const vehicleAI = {
+  toggle() {
+    vehicleAIActive = !vehicleAIActive;
+    $('vehicleAI').textContent = vehicleAIActive ? 'Vehicle AI: On' : 'Vehicle AI: Off';
+    $('vehicleAI').className = 'btn light' + (vehicleAIActive ? ' on' : '');
+    if (vehicleAIActive) {
+      vehicleDetector = createVehicleDetector({
+        modelPath: 'models/weights/yolo11n.onnx',
+        confThreshold: 0.25,
+        onDetection: (dets) => {
+          lastDetections = dets;
+          drawDetectionOverlay(dets);
+          if (stopTimer) {
+            lastStopped = stopTimer.update(dets, state.polygon);
+            lastDumpingCue = lastStopped.some(s => s.duration >= 2);
+            if (lastDumpingCue) {
+              $('note').textContent = 'DEMO: Vehicle stopped in zone ≥2s • officer review required';
+            }
+          }
+        },
+        onError: (err) => {
+          console.error('Vehicle detection error:', err);
+          $('note').textContent = 'Vehicle AI error: ' + err.message;
+        },
+      });
+      stopTimer = createStopTimer({
+        stopThresholdSeconds: 2,
+        onStopStart: ({ trackId, vehicleType, duration }) => {
+          $('note').textContent = `DEMO: ${vehicleType} (track ${trackId}) stopped ${duration.toFixed(0)}s in zone`;
+        },
+        onStopEnd: ({ trackId, vehicleType, duration }) => {
+          $('note').textContent = `DEMO: ${vehicleType} (track ${trackId}) left zone after ${duration.toFixed(0)}s`;
+        },
+        onTick: ({ trackId, vehicleType, duration }) => {
+          $('stopTimer').textContent = `${trackId}: ${duration.toFixed(1)}s`;
+        },
+      });
+      vehicleDetector.init().catch(() => {});
+      $('note').textContent = 'Vehicle AI: DEMO STAGE — loading model (requires yolo11n.onnx + OpenCV.js)';
+    } else {
+      if (vehicleDetector) { vehicleDetector.stop(); vehicleDetector = null; }
+      if (stopTimer) { stopTimer.reset(); stopTimer = null; }
+      lastDetections = [];
+      lastStopped = [];
+      lastPlate = null;
+      lastDumpingCue = false;
+      clearCanvas($('zoneCanvas'));
+      $('stopTimer').textContent = '—';
+      $('note').textContent = 'Vehicle AI stopped.';
+    }
+    updateMonitorUI();
+  },
+
+  getDetections() { return lastDetections; },
+  getStopped() { return lastStopped; },
+  getPlate() { return lastPlate; },
+  getDumpingCue() { return lastDumpingCue; },
+  isActive() { return vehicleAIActive; },
+};
+
+function drawDetectionOverlay(detections) {
+  const canvas = $('zoneCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const video = $('vid');
+  if (!video.videoWidth) return;
+  const scaleX = canvas.width / video.videoWidth;
+  const scaleY = canvas.height / video.videoHeight;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = '#00cc00';
+  ctx.fillStyle = '#00cc00';
+  ctx.lineWidth = 2;
+  ctx.font = '12px sans-serif';
+  for (const d of detections) {
+    const x = d.box.x1 * scaleX;
+    const y = d.box.y1 * scaleY;
+    const w = d.box.width * scaleX;
+    const h = d.box.height * scaleY;
+    ctx.strokeRect(x, y, w, h);
+    ctx.fillText(`${d.className} ${(d.confidence*100).toFixed(0)}%`, x, Math.max(y - 4, 10));
+  }
+}
 
 const camera = createCamera(video);
 const evidence = createEvidenceBuffer(CONFIG.monitor.bufferSize);
@@ -80,6 +174,7 @@ function resetIncidentUI(clearSource) {
 
   if (clearSource) {
     monitor.stop();
+    if (vehicleAI.isActive()) vehicleAI.toggle();
     camera.clear();
     video.style.display = 'none';
     $('empty').style.display = 'block';
@@ -117,7 +212,14 @@ function createIncident({ diff, frames, source, stableFor = null }) {
     status: result.status,
     statusCode: STATUS.REVIEW_REQUIRED,
     triggerReasons: result.triggerReasons,
-    detectionMethod: 'Zone-limited pixel difference (heuristic)',
+    detectionMethod: vehicleAI.isActive() ? 'YOLO11n + ByteTrack vehicle detection (DEMO STAGE)' : 'Zone-limited pixel difference (heuristic)',
+    vehicleData: vehicleAI.isActive() ? {
+      tracks: vehicleAI.getDetections().length,
+      stoppedVehicles: vehicleAI.getStopped().length,
+      longestStopSecs: vehicleAI.getStopped().reduce((m, s) => Math.max(m, s.duration), 0),
+      dumpingCue: vehicleAI.getDumpingCue(),
+      plate: vehicleAI.getPlate(),
+    } : null,
     source,
     stableFor,
     evidenceFrames: frames ? {
@@ -130,6 +232,27 @@ function createIncident({ diff, frames, source, stableFor = null }) {
     demo: false
   };
   state.incident = incident;
+
+  /* Vehicle AI UI */
+  const vInfo = $('vehicleAIInfo');
+  if (incident.vehicleData) {
+    vInfo.style.display = 'block';
+    $('vehicleTracks').textContent = incident.vehicleData.tracks;
+    $('vehicleStopped').textContent = incident.vehicleData.stoppedVehicles;
+    $('vehicleStopSecs').textContent = incident.vehicleData.longestStopSecs > 0 ? incident.vehicleData.longestStopSecs.toFixed(1) + 's' : '—';
+    $('vehicleDumpingCue').style.display = incident.vehicleData.dumpingCue ? 'inline' : 'none';
+    if (incident.vehicleData.plate) {
+      $('plate').textContent = incident.vehicleData.plate.text;
+      $('plateEdit').value = incident.vehicleData.plate.text;
+      $('confidence').textContent = `OCR conf ${(incident.vehicleData.plate.confidence*100).toFixed(1)}% • ${incident.vehicleData.plate.read_count}/${incident.vehicleData.plate.total_reads} reads`;
+      $('plateSource').textContent = 'OCR plate read (DEMO STAGE)';
+    }
+    if (incident.vehicleData.dumpingCue) {
+      $('note').textContent = 'DEMO: Dumping-event cue detected • officer review required';
+    }
+  } else {
+    vInfo.style.display = 'none';
+  }
 
   $('change').textContent = diff.toFixed(1) + '%';
   $('score').textContent = score.toFixed(2);
@@ -504,6 +627,8 @@ function wireEvents() {
     $('plate').textContent = value || 'Pending';
     if (state.incident) state.incident.plate = value || 'Manual review pending';
   };
+
+  $('vehicleAI').onclick = () => vehicleAI.toggle();
 
   $('download').onclick = () => {
     if (!state.incident) { alert('Generate and review an incident first.'); return; }

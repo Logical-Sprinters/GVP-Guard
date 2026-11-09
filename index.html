@@ -38,6 +38,7 @@
             <button class="btn light" id="stopWebcam" disabled>Stop camera</button>
             <select id="scenario" aria-label="Demo scenario type"><option value="person">Person / object event</option><option value="vehicle">Vehicle event</option></select>
             <span class="hint" id="filename">No video selected</span>
+            <button class="btn light" id="vehicleAI" style="margin-left:8px">Vehicle AI: Off</button>
           </div>
           <div class="sourcebar">
             <span class="barlabel">GVP zone</span>
@@ -66,7 +67,7 @@
             <button class="btn light" id="reset">Reset</button>
             <span class="livebadge" id="monitorState">Idle</span>
           </div>
-          <p class="notice">Monitoring uses a <b>scene-stability heuristic</b> inside the polygon (frame differencing + a stable-for timer). It is <b>not</b> vehicle detection, tracking, a stop timer for vehicles, or a dumping model.</p>
+          <p class="notice">Monitoring uses a <b>scene-stability heuristic</b> inside the polygon (frame differencing + a stable-for timer). Vehicle AI (YOLO11n + ByteTrack + EasyOCR) is <b>DEMO STAGE</b> — stop time alone does NOT imply guilt. Human review mandatory — no automatic fines.</p>
 
           <div class="progress"><div class="bar" id="bar"></div></div>
           <div class="steps">
@@ -97,7 +98,17 @@
           </div>
           <div class="plate">
             <div><div class="platebox" id="plate">Pending</div><small id="confidence">Awaiting analysis</small></div>
-            <div style="flex:1"><small>Manual plate review (no OCR yet)</small><input class="commentbox" id="plateEdit" placeholder="Enter plate after visual review" aria-label="Reviewed plate"></div>
+            <div style="flex:1"><small id="plateSource">Manual plate review (no OCR yet)</small><input class="commentbox" id="plateEdit" placeholder="Enter plate after visual review" aria-label="Reviewed plate"></div>
+          </div>
+          <div class="ai-info" style="margin-top:8px;padding:8px;background:#f4f1ec;border:1px dashed #b8a989;border-radius:6px;display:none" id="vehicleAIInfo">
+            <div style="font-size:12px;font-weight:bold">Vehicle AI (DEMO STAGE)</div>
+            <div class="kv" style="gap:12px;font-size:12px;margin-top:4px">
+              <div>Tracks<b id="vehicleTracks">0</b></div>
+              <div>Stopped<b id="vehicleStopped">0</b></div>
+              <div>Longest stop<b id="vehicleStopSecs">—</b></div>
+              <div>Dumping cue<span class="demotag" id="vehicleDumpingCue" style="display:none">• DUMPING CUE</span></div>
+            </div>
+            <div style="font-size:11px;color:#6c625b;margin-top:4px">Stop time alone does NOT imply guilt. Officer review required.</div>
           </div>
           <div class="kv">
             <div>Incident ID<b id="iid">—</b></div>
@@ -149,7 +160,7 @@
         <p class="notice">A stop or a scene change is only a suspected event. Supporting cues and an authorized officer's review are required before action.</p>
       </div></section>
       <section class="card"><div class="hd"><h2>Prototype Scope</h2></div><div class="body"><div class="scope">
-        <div>✓ Recorded-video workflow</div><div>✓ Live webcam input</div><div>✓ Editable GVP polygon</div><div>✓ Rolling evidence buffer</div><div>✓ Officer decision flow</div><div>✓ Optional API persistence</div><div>○ Vehicle detection: next build</div><div>○ Night ANPR: next build</div>
+        <div>✓ Recorded-video workflow</div><div>✓ Live webcam input</div><div>✓ Editable GVP polygon</div><div>✓ Rolling evidence buffer</div><div>✓ Officer decision flow</div><div>✓ Optional API persistence</div><div>○ Vehicle detection: DEMO STAGE (overlay)</div><div>○ Night ANPR: DEMO STAGE (multi-frame OCR)</div>
       </div></div></section>
     </div>
   </div>
@@ -205,8 +216,8 @@
         <div><b>Scene-stability monitor</b><span class="ok">WORKING</span><small>Heuristic frame differencing, not vehicle tracking</small></div>
         <div><b>Officer workflow</b><span class="ok">WORKING</span><small>Approve, reject, cleanup, reviewer, comment</small></div>
         <div><b>Incident persistence</b><span class="optional" id="persistenceStatus">LOCAL</span><small id="persistenceDetail">localStorage, with optional API backend</small></div>
-        <div><b>Vehicle AI</b><span class="demo">DEMO STAGE</span><small>Tracking overlay; model integration next</small></div>
-        <div><b>Night ANPR</b><span class="demo">DEMO STAGE</span><small>Editable candidate; multi-frame OCR next</small></div>
+        <div><b>Vehicle AI</b><span class="demo">DEMO STAGE</span><small>YOLO11n + ByteTrack overlay; calibration pending</small></div>
+        <div><b>Night ANPR</b><span class="demo">DEMO STAGE</span><small>EasyOCR multi-frame OCR; calibration pending</small></div>
       </div></div></section>
       <aside class="card"><div class="hd"><h2>Deployment Boundaries</h2></div><div class="body">
         <div class="alert"><strong>Human review required</strong><div style="font-size:12px;margin-top:4px">The prototype never issues an automatic fine.</div></div>
@@ -220,6 +231,7 @@
 
   <footer class="footer">Proof of concept using controlled footage • No automatic fine • Gandhidham validation planned after official access</footer>
 </main>
+<script src="https://docs.opencv.org/4.x/opencv.js" onerror="console.warn('OpenCV.js not loaded — vehicle AI overlay unavailable in this environment')"></script>
 <script type="module" src="assets/js/app.js"></script>
 </body>
 </html>
