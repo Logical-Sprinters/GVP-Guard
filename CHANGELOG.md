@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.4.0] — Step 4 vehicle detection code (DEMO STAGE) (2026-11-07)
+
+Application code added for Step 4 (vehicle detection + stop timer). All Step 4 features remain DEMO STAGE — not WORKING until benchmarked on a held-out test set. No accuracy figures published.
+
+### Added
+- `assets/js/vehicle-detection.js`: YOLO11n vehicle detection via OpenCV DNN (ONNX), vehicle stop timer inside GVP polygon, stop-start/stop-end events
+- `tools/benchmark_detection.py`: FPS/latency/per-class detection benchmark, outputs `benchmark_results.json`
+
+### Changed
+- `docs/15_IMPLEMENTATION_STATUS.md`: vehicle-detection.js added to code layout; Step 4 moved to DEMO STAGE table; open decision #6 updated; explicit NOT implemented list updated (removed vehicle detection/stop timer, kept ByteTrack/dumping-event/ANPR etc.)
+- `docs/12_BACKLOG.md`: P2 Vehicle AI items referenced against implemented code
+
+### Honesty notes
+- Vehicle detection and stop timer are DEMO STAGE — stop time alone does NOT imply guilt
+- Weights (`models/weights/yolo11n.onnx`) are NOT committed; download per `docs/STEP4_READINESS_PLAN.md`
+- ByteTrack integration, dumping-event model, object-transfer cues, plate detection, multi-frame OCR/ANPR remain NOT implemented
+
 ## [0.3.2] — Step 4 readiness tooling (2026-11-07)
 
 Concrete tools and documented sources for all three Step 4 prerequisites. No application code changed; Step 4 remains deferred.
