@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.4.3] — Step 4 polish: calibration + UI integration (DEMO STAGE) (2026-11-07)
+
+Step 4 polish complete: confidence calibration framework + browser UI integration. All Step 4 features remain DEMO STAGE — not WORKING until benchmarked on a held-out test set. No accuracy figures published.
+
+### Added
+- `tools/calibrate_step4.py`: confidence calibration test framework — precision/recall/F1 for vehicle detection, plate OCR accuracy, dumping-event cue metrics on held-out test footage with ground truth annotations, outputs `calibration_results.json`
+- `assets/js/vehicle-detection.js`: wired into app.js — detection overlay on video canvas, stop timer display, plate read integration, dumping-event cue badge
+
+### Changed
+- `assets/js/app.js`: imports vehicle-detection.js; vehicleAI toggle button; detection overlay rendering; vehicle data attached to incident records; plate field auto-filled from OCR consensus; stop timer and dumping cue shown in incident review panel
+- `index.html`: Vehicle AI button, stop timer/dumping cue UI elements, OpenCV.js script tag, updated notices and scope indicators
+- `assets/css/app.css`: `.btn.on` active state styling
+- `docs/15_IMPLEMENTATION_STATUS.md`: calibrate_step4.py in tools layout; calibration row in DEMO STAGE table; UI integration noted; decision #6 updated to CODE COMPLETE + POLISH; NOT implemented list updated (calibration/UI removed)
+- `CHANGELOG.md`: [0.4.3] entry
+- `package.json`/`package-lock.json`: version 0.4.3
+
+### Honesty notes
+- All Step 4 features remain DEMO STAGE — stop time alone does NOT imply guilt
+- Weights (`models/weights/yolo11n.onnx`) and datasets are NOT committed; download per `docs/STEP4_READINESS_PLAN.md`
+- No plate detection model weights committed; anpr_pipeline.py uses lower-bumper crop heuristic
+- Vehicle AI overlay requires OpenCV.js (loaded from CDN, graceful fallback if unavailable)
+- Calibration requires ground-truth annotated test footage — run `python tools/calibrate_step4.py` with `--ground-truth`
+- Remaining: field validation with GMC-approved footage
+
 ## [0.4.2] — Step 4 ANPR pipeline + dumping-event cue (DEMO STAGE) (2026-11-07)
 
 Complete Step 4 implementation: vehicle detection + ByteTrack tracking + EasyOCR plate OCR + dumping-event detection. All Step 4 features remain DEMO STAGE — not WORKING until benchmarked on a held-out test set. No accuracy figures published.
