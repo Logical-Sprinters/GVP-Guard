@@ -1,25 +1,48 @@
-# Contributing
+# Contributing to GVP-Guard
 
-1. Read the PRD (`docs/01_PRODUCT_REQUIREMENTS.md`) and MVP scope (`docs/03_MVP_SCOPE.md`).
-2. Create an issue with acceptance criteria.
-3. Branch from `master` — the protected development base of the org repository (`main` currently holds only a placeholder README; the long-term base-branch decision is tracked in the `docs/README.md` watchlist). Use short-lived branches: `feat/...`, `fix/...`, `docs/...`.
-4. Keep secrets, real personal data, real footage and stream credentials out of commits.
-5. Add tests or a documented manual test.
-6. Update relevant documentation (including the `docs/15_IMPLEMENTATION_STATUS.md` ledger for code changes).
-7. Open a pull request with screenshots/results and known limitations.
-8. Obtain one review from a member of **another role** (roles: AI/Vision/Data · Backend/Database/Evidence · Frontend/UI/UX · Integration/Testing — see `docs/14_TEAM_WORKFLOW.md`; named owners in `docs/16_TEAM_ROSTER_AND_OWNERSHIP.md`). Merge by squash; keep `master` green.
+Team TM004162, P. P. Savani University, Surat
 
-## Documentation conventions
-- Canonical specifications are the numbered files in `docs/`; edit them in place and do not renumber them.
-- Add an entry to `docs/README.md` when introducing a new document.
-- Record user-visible changes in `CHANGELOG.md`.
-- Keep the demo `index.html` at the repository root so static hosting continues to work.
-- Record team, roster or ownership changes in `docs/16_TEAM_ROSTER_AND_OWNERSHIP.md` via a PR approved by the Team Lead, and keep the judge-facing docs (`docs/14`, `docs/16`, `docs/hackathon/*`) in sync with each other.
+## Team Structure
 
-## Commit examples
-`feat(anpr): add frame quality scoring`
-`fix(events): avoid duplicate incidents`
-`docs(api): define cleanup request endpoint`
+| Role | Primary Owner | Co-owner |
+|------|---------------|----------|
+| AI / Vision / Data (Team Lead) | Omkar Solat | Prafull Mayank Singh |
+| Backend / Database / Evidence | Shivansh Gupta | Jay Katkar |
+| Frontend / UI / UX | Janed Patel | Smeet Jariwala |
+| Integration / Testing | Prince Rana | Sayantani Mandal |
 
-## Claim discipline
-Documentation and demos must separate working, demo-stage, planned and external-dependency features. Never label a planned feature as implemented, never publish unmeasured accuracy or impact figures, and never claim legal admissibility or automatic enforcement. See `docs/hackathon/JUDGE_QA.md` for the shared terminology table.
+See `docs/16_TEAM_ROSTER_AND_OWNERSHIP.md` for full roster, file ownership, and hand-off conventions.
+
+## How to Contribute
+
+1. **Create an issue** using the templates in `.github/ISSUE_TEMPLATE/`
+   - Every issue needs: problem, user value, acceptance criteria, owner, dependencies, estimate, test evidence
+2. **Create a branch** from `master`
+   - Naming: `feat/<description>` or `fix/<description>` or `docs/<description>`
+3. **Implement** your changes
+   - Follow file ownership from `docs/16_TEAM_ROSTER_AND_OWNERSHIP.md`
+   - Shared contracts (API shape, STATUS enum, evidence schema, threshold semantics) are never changed unilaterally
+4. **Update `docs/15_IMPLEMENTATION_STATUS.md`** in the same PR
+5. **Update `CHANGELOG.md`** in the same PR
+6. **Run tests** before submitting
+   - `npm test` (11/11 JS tests)
+   - `python3 -m unittest backend.test_db -v` (10/10 Python tests)
+7. **Open a PR** against `master`
+   - PR author updates CHANGELOG in the same PR
+   - Team Lead reviews and merges
+
+## Claim Discipline (Mandatory)
+
+- "Review-ready incident record" — never "legally admissible evidence"
+- Label as WORKING / DEMO STAGE / PLANNED / EXTERNAL DEPENDENCY
+- Live monitor is scene-stability heuristic, NOT vehicle detection/tracking/stop timer/dumping model
+- No accuracy/impact percentages without documented tests
+- Human review mandatory — no automatic fines
+- No GMC/registry/e-challan integration
+
+## Branch Policy
+
+- `master` holds all code (default branch)
+- `main` is a placeholder README
+- All PRs merge to `master` via merge commits
+- No force-push to `master`

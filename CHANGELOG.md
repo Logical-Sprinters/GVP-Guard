@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.4.5] — Open decisions #2 #5 #7 resolved (2026-11-07)
+
+Roadmap granularity, repo scaffolding, and judge-deck slide 8 spec all resolved. All Step 4 features remain DEMO STAGE — not WORKING until benchmarked on a held-out test set. No accuracy figures published.
+
+### Added
+- `docs/JUDGE_DECK_SLIDE_8_SPEC.md`: slide 8 specification for 4 roles × 2 members (Frontend / UI / UX to rebuild before final round)
+- `LICENSE`: MIT License
+- `.github/ISSUE_TEMPLATE/bug_report.md`: bug report template following backlog rule
+- `.github/ISSUE_TEMPLATE/feature_request.md`: feature request template following backlog rule
+- `CONTRIBUTING.md`: team structure, how to contribute, claim discipline, branch policy
+
+### Changed
+- `docs/11_DEVELOPMENT_ROADMAP.md`: Phase → Judge-deck → Demo mapping table added; claim discipline labels per phase (WORKING / DEMO STAGE / PLANNED)
+- `docs/15_IMPLEMENTATION_STATUS.md`: decisions #2, #5, #7 marked RESOLVED
+- `package.json`/`package-lock.json`: version 0.4.5
+
+### Honesty notes
+- All Step 4 features remain DEMO STAGE — stop time alone does NOT imply guilt
+- Weights and datasets NOT committed; download per `docs/STEP4_READINESS_PLAN.md`
+
 ## [0.4.4] — Step 4 incident association (DEMO STAGE) (2026-11-07)
 
 Incident association added: ANPR pipeline results can now be pushed into the SQLite evidence pipeline via `POST /incidents` or direct SQLite insert. All Step 4 features remain DEMO STAGE — not WORKING until benchmarked on a held-out test set. No accuracy figures published.
