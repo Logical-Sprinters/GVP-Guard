@@ -1,52 +1,74 @@
-# Step 4 Tools — Vehicle Detection + Multi-Frame ANPR
+# Step 4 Tools — Vehicle Detection + Multi-Frame ANPR + Incident Association
 
-This directory contains the concrete tooling to acquire and benchmark the three
-Step 4 prerequisites. None of these tools are application code — they are
-preparation scripts for the deferred Step 4 build.
+This directory contains the concrete tooling for Step 4 of GVP-Guard:
+vehicle detection, ByteTrack tracking, EasyOCR plate OCR, dumping-event cue,
+confidence calibration, and incident association with the SQLite pipeline.
+
+All Step 4 features remain **DEMO STAGE** — not WORKING until benchmarked on
+held-out test footage. No accuracy figures published without documented tests.
 
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `download_weights.py` | Downloads YOLO11n/s pretrained weights (exact URLs) |
-| `requirements.txt` | Python dependencies (ultralytics, opencv-python, easyocr, numpy) |
-| `benchmark_detection.py` | Runs detection benchmark; outputs `benchmark_results.json` |
-| `dataset_acquisition.md` | Exact dataset URLs for vehicle detection + Indian ANPR |
+| `download_weights.py` | Download YOLO11n / YOLO11s weights (Ultralytics CDN + Hugging Face mirror) |
+| `benchmark_detection.py` | FPS / latency / per-class detection benchmark → `benchmark_results.json` |
+| `track_vehicles.py` | YOLO11n + ByteTrack vehicle tracking → per-track stop durations → `tracking_results.json` |
+| `anpr_pipeline.py` | Full pipeline: detect → track → plate OCR → dumping-event cue → `anpr_results.json` |
+| `calibrate_step4.py` | Confidence calibration: precision/recall/F1 on held-out footage → `calibration_results.json` |
+| `associate_incidents.py` | Convert `anpr_results.json` incident candidates into SQLite incident records |
+| `ground_truth_template.json` | Template for ground-truth annotations for calibration |
+| `requirements.txt` | Python dependencies: ultralytics, opencv-python, numpy, easyocr, Pillow |
+| `dataset_acquisition.md` | Exact dataset URLs (Indian plates + vehicle detection) |
+| `README.md` | This file |
 
-## Quick start (run on your own machine — this sandbox has no internet)
+## Quick start (run on your own machine)
 
-```bash
-# 1. Install dependencies
+```powershell
+# 1. Activate venv (your local machine)
+c:\bloodbridge\backend\venv\Scripts\Activate.ps1
+
+# 2. Install dependencies
 pip install -r tools/requirements.txt
 
-# 2. Download weights (~5.6 MB for nano)
-python3 tools/download_weights.py
+# 3. Download YOLO11n weights (~5.6 MB)
+python tools/download_weights.py --model yolo11n --out models/weights/yolo11n.pt
 
-# 3. Verify weights load
-python3 -c "from ultralytics import YOLO; m = YOLO('models/weights/yolo11n.pt'); print('classes:', m.names)"
+# 4. Verify weights load
+python -c "from ultralytics import YOLO; m=YOLO('models/weights/yolo11n.pt'); print('Model loaded')"
 
-# 4. Download datasets (see tools/dataset_acquisition.md for exact URLs)
-#    - COCO val2017 for vehicle detection baseline
-#    - Indian Truck License Plates sample (Kaggle / Hugging Face) for ANPR
+# 5. Run ANPR pipeline on your video
+python tools\anpr_pipeline.py --source path\to\your\video.mp4 --weights models\weights\yolo11n.pt --max-frames 100
 
-# 5. Run benchmark
-python3 tools/benchmark_detection.py --source <your_test_video.mp4> --weights models/weights/yolo11n.pt
+# 6. Associate AI incidents with SQLite pipeline
+python tools\associate_incidents.py --input anpr_results.json --db backend/data/gvp_guard.db
+
+# 7. Run calibration (needs ground-truth annotations)
+python tools\calibrate_step4.py --source path\to\test.mp4 --weights models\weights\yolo11n.pt --ground-truth tools\ground_truth.json
 ```
 
 ## What this proves
 
-The benchmark script measures exactly the metrics from `docs/05_DATA_AND_ML_PLAN.md`:
 - Detection FPS and latency (target: ≥ 5 FPS, ≤ 200 ms per frame)
-- Per-class detection counts (car, bus, truck)
-- Model load time
-
-If YOLO11n meets the targets on COCO / Indian plate data, Step 4 can proceed
-to fine-tuning on the controlled Gandhidham dataset.
+- ByteTrack persistent track IDs across frames
+- EasyOCR multi-frame plate consensus
+- Dumping-event cue detection (stopped vehicle + person overlap)
+- Calibration metrics: precision/recall/F1 for each component
+- Incident association with SQLite evidence pipeline
 
 ## Go / no-go (record in docs/STEP4_READINESS_PLAN.md)
 
-Step 4 may begin only when:
-- [ ] Weights downloaded + verified offline (sha256 recorded)
+Step 4 may proceed to WORKING only when:
+
+- [ ] Weights downloaded + verified offline
 - [ ] Controlled dataset collected + annotated + split
 - [ ] Benchmark run completed with all metrics recorded
-- [ ] Team agrees in PR that evidence supports beginning Step 4
+- [ ] Calibration run on held-out test footage with documented precision/recall/F1
+- [ ] Team agrees in PR that evidence supports moving DEMO STAGE → WORKING
+
+## Claim discipline
+
+- All Step 4 code is DEMO STAGE — stop time alone does NOT imply guilt
+- Human review mandatory — no automatic fines or guilt
+- Weights and datasets are external dependencies — NOT committed to Git
+- No accuracy figures without documented calibration tests

@@ -1,0 +1,22 @@
+{
+  "fps": 25,
+  "notes": "REPLACE WITH YOUR TEST FOOTAGE DETAILS: camera, lighting, location, source",
+  "frames": [
+    {
+      "frame": 0,
+      "vehicles": [
+        {
+          "box": [100, 200, 300, 400],
+          "plate": "GJ12AB4381",
+          "type": "car"
+        }
+      ],
+      "persons": [
+        {
+          "box": [310, 210, 350, 300]
+        }
+      ],
+      "dumping": false
+    }
+  ]
+}

@@ -26,6 +26,8 @@ class IncidentIn(BaseModel):
     source: str | None = None
     reviewer: str | None = None
     comment: str | None = None
+    detectionMethod: str | None = None
+    vehicleData: dict | None = None
 
 
 class DecisionIn(BaseModel):
