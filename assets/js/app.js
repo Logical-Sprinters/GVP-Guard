@@ -285,6 +285,103 @@ function createIncident({ diff, frames, source, stableFor = null }) {
   }).catch(() => {});
 }
 
+/* ----------------------------- Create Incident from Vehicle AI ----------------------------- */
+
+async function createAIIncident() {
+  if (!vehicleAI.isActive() || vehicleAI.getDetections().length === 0) {
+    alert('No Vehicle AI data available. Turn on Vehicle AI and run detection first.');
+    return;
+  }
+
+  const stopped = vehicleAI.getStopped();
+  const detections = vehicleAI.getDetections();
+  const plate = vehicleAI.getPlate();
+  const dumpingCue = vehicleAI.getDumpingCue();
+
+  if (stopped.length === 0 && !dumpingCue) {
+    if (!confirm('No stopped vehicles or dumping cues detected. Create incident anyway?')) {
+      return;
+    }
+  }
+
+  const longestStop = stopped.reduce((m, s) => Math.max(m, s.duration), 0);
+  const triggerReasons = [];
+  if (longestStop > 0) triggerReasons.push(`vehicle_stop_${longestStop.toFixed(1)}s`);
+  if (dumpingCue) triggerReasons.push('person_object_overlap');
+  if (plate) triggerReasons.push('plate_ocr_read');
+
+  const incident = {
+    id: makeIncidentId(),
+    time: new Date().toLocaleString(),
+    file: state.filename,
+    sceneChange: longestStop > 0 ? `${longestStop.toFixed(1)}s vehicle stop` : 'Vehicle AI detection',
+    illustrativeCueScore: (Math.min(100, longestStop * 10 + (dumpingCue ? 20 : 0))).toFixed(2),
+    plate: plate ? plate.text : 'Manual review pending',
+    decision: 'Pending',
+    location: $('zoneSelect').value,
+    status: 'REVIEW_REQUIRED',
+    statusCode: STATUS.REVIEW_REQUIRED,
+    demo: false,
+    triggerReasons,
+    detectionMethod: 'YOLO11n + ByteTrack + EasyOCR (DEMO STAGE)',
+    vehicleData: {
+      tracks: detections.length,
+      stoppedVehicles: stopped.length,
+      longestStopSecs: longestStop > 0 ? longestStop : 0,
+      dumpingCue,
+      plate,
+      stopEvents: stopped.map(s => ({
+        trackId: s.trackId,
+        duration: s.duration,
+        vehicleType: s.vehicleType,
+      })),
+    },
+    source: 'Vehicle AI incident creation (DEMO STAGE)',
+    reviewer: $('reviewer').value.trim() || 'Demo officer',
+    comment: '',
+    evidenceFrames: null,
+  };
+
+  state.incident = incident;
+
+  // Update UI
+  $('change').textContent = incident.sceneChange;
+  $('score').textContent = incident.illustrativeCueScore;
+  $('iid').textContent = incident.id;
+  $('time').textContent = incident.time;
+  $('location').textContent = incident.location;
+  $('decision').textContent = 'Pending';
+  $('statusCode').textContent = incident.statusCode;
+  $('istatus').textContent = STATUS_LABEL[STATUS.REVIEW_REQUIRED];
+  $('plate').textContent = incident.plate;
+  $('alert').innerHTML = '<strong>Vehicle AI incident created</strong><div style="font-size:12px;margin-top:4px;color:#6c625b">Officer review required — not an automatic fine.</div>';
+  $('track').style.display = 'block';
+  $('trackLabel').textContent = 'Vehicle AI incident • DEMO STAGE';
+
+  const vInfo = $('vehicleAIInfo');
+  vInfo.style.display = 'block';
+  $('vehicleTracks').textContent = incident.vehicleData.tracks;
+  $('vehicleStopped').textContent = incident.vehicleData.stoppedVehicles;
+  $('vehicleStopSecs').textContent = incident.vehicleData.longestStopSecs > 0 ? incident.vehicleData.longestStopSecs.toFixed(1) + 's' : '—';
+  $('vehicleDumpingCue').style.display = incident.vehicleData.dumpingCue ? 'inline' : 'none';
+  if (plate) {
+    $('plateEdit').value = plate.text;
+    $('confidence').textContent = `OCR conf ${(plate.confidence * 100).toFixed(1)}% • ${plate.read_count}/${plate.total_reads} reads`;
+    $('plateSource').textContent = 'OCR plate read (DEMO STAGE)';
+  }
+
+  $('note').textContent = 'Vehicle AI incident created. Review all evidence before choosing an action.';
+
+  try {
+    await storage.upsert(incident);
+    await refreshHistory();
+    await loadCleanupSection();
+  } catch (e) {
+    console.error('Failed to persist AI incident:', e);
+    $('note').textContent = 'Incident created locally (API unavailable).';
+  }
+}
+
 async function runAnalysis() {
   if (camera.mode === 'none') { alert('Choose a recorded video or start the webcam first.'); return; }
   if (camera.mode === 'webcam') {
@@ -629,6 +726,8 @@ function wireEvents() {
   };
 
   $('vehicleAI').onclick = () => vehicleAI.toggle();
+
+  $('createAIIncident').onclick = () => createAIIncident();
 
   $('download').onclick = () => {
     if (!state.incident) { alert('Generate and review an incident first.'); return; }

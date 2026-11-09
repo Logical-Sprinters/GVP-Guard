@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.4.4] — Step 4 incident association (DEMO STAGE) (2026-11-07)
+
+Incident association added: ANPR pipeline results can now be pushed into the SQLite evidence pipeline via `POST /incidents` or direct SQLite insert. All Step 4 features remain DEMO STAGE — not WORKING until benchmarked on a held-out test set. No accuracy figures published.
+
+### Added
+- `tools/associate_incidents.py`: Convert `anpr_results.json` incident candidates into SQLite incident records; supports direct SQLite insert or POST to running API server; outputs `associated_incidents.json`
+- Backend schema: `detectionMethod` and `vehicleData` fields added to `IncidentIn` model
+
+### Changed
+- `assets/js/app.js`: `createAIIncident()` function; "Create Incident from Vehicle AI" button wired in `index.html`; vehicle data attached to incident records
+- `index.html`: Create Incident from Vehicle AI button
+- `backend/schemas.py`: `detectionMethod` and `vehicleData` fields on `IncidentIn`
+- `docs/15_IMPLEMENTATION_STATUS.md`: associate_incidents.py in tools layout; incident association row in DEMO STAGE table; decision #6 updated
+- `CHANGELOG.md`: [0.4.4] entry
+- `package.json`/`package-lock.json`: version 0.4.4
+
+### Honesty notes
+- All Step 4 features remain DEMO STAGE — stop time alone does NOT imply guilt
+- Incidents created with statusCode=REVIEW_REQUIRED; officer decision required — no automatic fines
+- Weights and datasets NOT committed; download per `docs/STEP4_READINESS_PLAN.md`
+- Calibration requires ground-truth annotated footage: `python tools/calibrate_step4.py --ground-truth gt.json`
+
 ## [0.4.3] — Step 4 polish: calibration + UI integration (DEMO STAGE) (2026-11-07)
 
 Step 4 polish complete: confidence calibration framework + browser UI integration. All Step 4 features remain DEMO STAGE — not WORKING until benchmarked on a held-out test set. No accuracy figures published.
