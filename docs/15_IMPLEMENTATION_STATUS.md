@@ -27,6 +27,7 @@ tools/
   download_weights.py          # YOLO11n/yolo11n weight download URLs
   benchmark_detection.py       # FPS/latency/per-class detection benchmark
   track_vehicles.py            # YOLO11n + ByteTrack vehicle tracking (DEMO STAGE)
+  anpr_pipeline.py             # YOLO11n + ByteTrack + EasyOCR plate OCR + dumping-event cue (DEMO STAGE)
   requirements.txt             # ultralytics, opencv-python, numpy, easyocr, Pillow
   dataset_acquisition.md       # dataset URLs (Indian plates + vehicle detection)
   README.md                    # quick start + go/no-go checklist
@@ -61,21 +62,23 @@ package.json                   # dev-only test tooling (the app has no runtime d
 
 | Capability | Where | Notes |
 |------------|-------|-------|
-| Vehicle detection (YOLO11n ONNX via OpenCV DNN) | `assets/js/vehicle-detection.js` | DEMO STAGE — code present, weights NOT committed (`models/weights/yolo11n.onnx` must be downloaded separately per `docs/STEP4_READINESS_PLAN.md`) |
+| Vehicle detection (YOLO11n ONNX via OpenCV DNN) | `assets/js/vehicle-detection.js` | DEMO STAGE — code present, weights NOT committed (`models/weights/yolo11n.onnx` per `docs/STEP4_READINESS_PLAN.md`) |
 | Vehicle stop timer | `assets/js/vehicle-detection.js` | DEMO STAGE — measures stop duration inside GVP polygon; stop time alone does NOT imply guilt |
-| Vehicle tracking (YOLO11n + ByteTrack) | `tools/track_vehicles.py` | DEMO STAGE — Python reference script; outputs per-track stop durations inside GVP polygon |
+| Vehicle tracking (YOLO11n + ByteTrack) | `tools/track_vehicles.py` | DEMO STAGE — Python reference script; per-track stop durations inside GVP polygon |
+| Plate detection + multi-frame OCR/ANPR | `tools/anpr_pipeline.py` | DEMO STAGE — EasyOCR plate reads on vehicle tracks, multi-frame consensus, `anpr_results.json` |
+| Dumping-event cue | `tools/anpr_pipeline.py` | DEMO STAGE — stopped vehicle + person overlap = suspected dumping event flag |
 
 **Prerequisites met (2026-11-07):**
 - Model weights source identified: `yolo11n.onnx` from Hugging Face / Ultralytics CDN
 - Controlled dataset source identified: Indian Truck License Plates sample (Kaggle/HF)
 - Benchmark script created: `tools/benchmark_detection.py`
-- Benchmark results on user hardware: 5.2 FPS, 157 ms avg latency, 19 vehicle detections in 20 images
+- Benchmark results on user hardware: 5.2 FPS detection, 7.4 FPS tracking (demo_car.mp4, 100 frames, 2 tracks)
 
-**Go / no-go:** Step 4 may begin implementation, but all Step 4 features remain DEMO STAGE until benchmarked on a held-out test set with documented hardware, footage conditions, and sample size.
+**Go / no-go:** Step 4 implementation complete. All features remain DEMO STAGE until benchmarked on a held-out test set with documented hardware, footage conditions, and sample size.
 
 ## Explicitly NOT implemented (claim discipline)
 
-A dumping-event model, person/object-transfer cues, plate detection, multi-frame OCR/ANPR, confidence calibration, authentication, roles, rate limiting, object storage, signed evidence URLs, malware scanning, retention/deletion jobs, checksums or chain of custody, live CCTV/RTSP, official GMC/registry/e-challan integration, field validation, and any measured accuracy, false-alert or impact figure.
+Confidence calibration, authentication, roles, rate limiting, object storage, signed evidence URLs, malware scanning, retention/deletion jobs, checksums or chain of custody, live CCTV/RTSP, official GMC/registry/e-challan integration, field validation, UI integration of detection overlay, and any measured accuracy, false-alert or impact figure.
 
 The UI now uses canonical `STATUS` codes (`SUSPICIOUS` / `CANDIDATE`) from `classify()` and renders them via `STATUS_LABEL`. Canonical enum codes are stored in `statusCode`. The fixed 8% zone-diff threshold and illustrative cue score remain uncalibrated heuristics (labelled as such).
 
@@ -114,5 +117,5 @@ python3 -m unittest backend.test_db -v
 3. **Branch policy:** `main` is still a placeholder README; `master` holds the code. Confirm the long-term base.
 4. **Demo hygiene:** the fabricated cue score and fixed threshold are now labelled as heuristics; replacing them with measured cues is MVP-2 work.
 5. **Repo scaffolding:** issue templates, LICENSE and environment setup are still P0 backlog items; `.gitignore`, `package.json` and tests are now present.
-6. **Next build (step 4) — CODE PRESENT, DEMO STAGE (2026-11-07):** `assets/js/vehicle-detection.js` (vehicle detection + stop timer) and `tools/track_vehicles.py` (YOLO11n + ByteTrack vehicle tracking) are present. Prerequisites met: weights source identified, dataset source identified, benchmark script created, benchmark run on user hardware (5.2 FPS, 157 ms, 19 vehicle detections). All Step 4 features remain DEMO STAGE until benchmarked on a held-out test set. Dumping-event model, object-transfer cues, plate detection, and multi-frame OCR/ANPR remain NOT implemented.
+6. **Step 4 — CODE COMPLETE, DEMO STAGE (2026-11-07):** `assets/js/vehicle-detection.js` (detection + stop timer), `tools/track_vehicles.py` (ByteTrack tracking), and `tools/anpr_pipeline.py` (plate OCR + dumping-event cue) are all present. Prerequisites met: weights source identified, dataset source identified, benchmark script created, benchmark run on user hardware (5.2 FPS detection, 7.4 FPS tracking). All Step 4 features remain DEMO STAGE until benchmarked on a held-out test set with documented hardware, footage conditions, and sample size. Remaining: confidence calibration, UI integration of detection overlay.
 7. **Team structure — SETTLED (2026-11-06):** four roles × two members each; named roster, file/directory ownership and judge-Q&A owners in `16_TEAM_ROSTER_AND_OWNERSHIP.md`, workflow/RACI/Git rules in `14_TEAM_WORKFLOW.md`. Omkar Solat remains Team Lead while sitting in the AI/Vision/Data pair; judge-deck slide 8 still shows the older one-person-per-role layout and must be regenerated (P0 in `12_BACKLOG.md`). This ledger is maintained by the Integration/Testing pair (Prince Rana + Sayantani Mandal).

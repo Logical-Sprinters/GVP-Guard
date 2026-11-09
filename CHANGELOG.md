@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.4.2] — Step 4 ANPR pipeline + dumping-event cue (DEMO STAGE) (2026-11-07)
+
+Complete Step 4 implementation: vehicle detection + ByteTrack tracking + EasyOCR plate OCR + dumping-event detection. All Step 4 features remain DEMO STAGE — not WORKING until benchmarked on a held-out test set. No accuracy figures published.
+
+### Added
+- `tools/anpr_pipeline.py`: YOLO11n + ByteTrack vehicle tracking, license plate OCR via EasyOCR with multi-frame consensus, stopped-vehicle + person-overlap dumping-event cue, outputs `anpr_results.json` with per-track plate reads and incident candidates
+
+### Changed
+- `docs/15_IMPLEMENTATION_STATUS.md`: anpr_pipeline.py added to tools layout; plate OCR and dumping-event cue added to DEMO STAGE table; open decision #6 updated to CODE COMPLETE; explicit NOT implemented list updated (removed dumping-event model, plate detection, multi-frame OCR/ANPR)
+
+### Honesty notes
+- Vehicle detection, stop timer, ByteTrack tracking, plate OCR, and dumping-event cue are DEMO STAGE — stop time alone does NOT imply guilt
+- Weights (`models/weights/yolo11n.onnx`) and datasets are NOT committed; download per `docs/STEP4_READINESS_PLAN.md`
+- No plate detection model weights committed; anpr_pipeline.py uses a lower-bumper crop heuristic for plate region (dedicated plate detector recommended for production)
+- Remaining: confidence calibration, UI integration of detection overlay
+
 ## [0.4.1] — Step 4 ByteTrack vehicle tracking (DEMO STAGE) (2026-11-07)
 
 ByteTrack tracking added to Step 4. All Step 4 features remain DEMO STAGE — not WORKING until benchmarked on a held-out test set. No accuracy figures published.
