@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.1] — Step 4 ByteTrack vehicle tracking (DEMO STAGE) (2026-11-07)
+
+ByteTrack tracking added to Step 4. All Step 4 features remain DEMO STAGE — not WORKING until benchmarked on a held-out test set. No accuracy figures published.
+
+### Added
+- `tools/track_vehicles.py`: YOLO11n + ByteTrack vehicle tracking; outputs per-track stop durations inside configurable GVP polygon, saves `tracking_results.json`
+
+### Changed
+- `docs/15_IMPLEMENTATION_STATUS.md`: track_vehicles.py added to tools layout; ByteTrack tracking added to DEMO STAGE table; open decision #6 updated; explicit NOT implemented list updated (ByteTrack/tracking IDs removed)
+
+### Honesty notes
+- Vehicle detection, stop timer, and ByteTrack tracking are DEMO STAGE — stop time alone does NOT imply guilt
+- Weights (`models/weights/yolo11n.onnx`) are NOT committed; download per `docs/STEP4_READINESS_PLAN.md`
+- Dumping-event model, object-transfer cues, plate detection, multi-frame OCR/ANPR remain NOT implemented
+
 ## [0.4.0] — Step 4 vehicle detection code (DEMO STAGE) (2026-11-07)
 
 Application code added for Step 4 (vehicle detection + stop timer). All Step 4 features remain DEMO STAGE — not WORKING until benchmarked on a held-out test set. No accuracy figures published.
