@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.4.1] — Step 4 ByteTrack vehicle tracking (DEMO STAGE) (2026-11-07)
+
+ByteTrack tracking added to Step 4. All Step 4 features remain DEMO STAGE — not WORKING until benchmarked on a held-out test set. No accuracy figures published.
+
+### Added
+- `tools/track_vehicles.py`: YOLO11n + ByteTrack vehicle tracking; outputs per-track stop durations inside configurable GVP polygon, saves `tracking_results.json`
+
+### Changed
+- `docs/15_IMPLEMENTATION_STATUS.md`: track_vehicles.py added to tools layout; ByteTrack tracking added to DEMO STAGE table; open decision #6 updated; explicit NOT implemented list updated (ByteTrack/tracking IDs removed)
+
+### Honesty notes
+- Vehicle detection, stop timer, and ByteTrack tracking are DEMO STAGE — stop time alone does NOT imply guilt
+- Weights (`models/weights/yolo11n.onnx`) are NOT committed; download per `docs/STEP4_READINESS_PLAN.md`
+- Dumping-event model, object-transfer cues, plate detection, multi-frame OCR/ANPR remain NOT implemented
+
+## [0.4.0] — Step 4 vehicle detection code (DEMO STAGE) (2026-11-07)
+
+Application code added for Step 4 (vehicle detection + stop timer). All Step 4 features remain DEMO STAGE — not WORKING until benchmarked on a held-out test set. No accuracy figures published.
+
+### Added
+- `assets/js/vehicle-detection.js`: YOLO11n vehicle detection via OpenCV DNN (ONNX), vehicle stop timer inside GVP polygon, stop-start/stop-end events
+- `tools/download_weights.py`: exact download URLs for YOLO11n/yolo11n.onnx weights (Ultralytics CDN + Hugging Face mirrors)
+- `tools/benchmark_detection.py`: FPS/latency/per-class detection benchmark, outputs `benchmark_results.json`
+- `tools/requirements.txt`: ultralytics, opencv-python, numpy, easyocr, Pillow
+- `tools/dataset_acquisition.md`: exact dataset URLs (Indian Truck License Plates, Indian Number Plates, etc.)
+- `tools/README.md`: quick start and go/no-go checklist
+
+### Changed
+- `docs/15_IMPLEMENTATION_STATUS.md`: vehicle-detection.js and tools/ added to code layout; DEMO STAGE table added; open decision #6 updated; explicit NOT implemented list updated
+
+### Honesty notes
+- Vehicle detection and stop timer are DEMO STAGE — stop time alone does NOT imply guilt
+- Weights and datasets are NOT committed; download per `docs/STEP4_READINESS_PLAN.md`
+- ByteTrack integration, dumping-event model, object-transfer cues, plate detection, multi-frame OCR/ANPR remain NOT implemented
+
 ## [0.3.1] — Step 4 readiness planning (2026-11-06)
 
 Documentation-only release: defines the prerequisites that must be met before Step 4 (vehicle detection + multi-frame ANPR) can begin. No application code changed; Step 4 remains deferred.
