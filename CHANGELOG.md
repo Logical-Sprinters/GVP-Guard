@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.5.0] — MVP-2 Pilot & Field Validation (planning / partial implementation) (2026-11-07)
+
+MVP-2 plan and tooling added. All Step 4 features remain DEMO STAGE — not WORKING until benchmarked on a held-out test set. No accuracy figures published.
+
+### Added
+- `docs/MVP2_PLAN.md`: MVP-2 plan — pilot & field validation scope, deliverables, golden scenarios, KPI metrics, field validation conditions, claim discipline, acceptance criteria
+- `tools/video_test_harness.py`: automated video test harness for seven golden scenarios (GS-01 to GS-07), outputs `test_results.json`
+- `tools/kpi_harness.py`: KPI measurement harness — plate-read rate, false alerts per camera-hour, alert-to-action time, evidence completeness, dumping-event precision, detection FPS/latency, with Wilson score confidence intervals, outputs `kpi_results.json`
+- `tools/golden_scenarios_template.json`: template for seven golden scenarios with expected outcomes
+
+### Changed
+- `docs/11_DEVELOPMENT_ROADMAP.md`: Phase → Judge-deck → Demo mapping table; claim discipline labels per phase
+- `docs/15_IMPLEMENTATION_STATUS.md`: MVP-2 section added; decision #4 updated; NOT implemented list updated
+- `CHANGELOG.md`: [0.5.0] entry
+- `package.json`/`package-lock.json`: version 0.5.0
+
+### Honesty notes
+- All Step 4 features remain DEMO STAGE — stop time alone does NOT imply guilt
+- MVP-2 field tests require GMC-approved footage — not yet conducted
+- No accuracy/false-alert/impact figures without documented calibration tests
+- Human review mandatory — no automatic fines or guilt
+
 ## [0.4.5] — Open decisions #2 #5 #7 resolved (2026-11-07)
 
 Roadmap granularity, repo scaffolding, and judge-deck slide 8 spec all resolved. All Step 4 features remain DEMO STAGE — not WORKING until benchmarked on a held-out test set. No accuracy figures published.
