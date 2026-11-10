@@ -1,0 +1,68 @@
+{
+  "notes": "REPLACE with your controlled video clips and expected outcomes. Each scenario needs a video file and expected incident/no-incident outcome.",
+  "scenarios": [
+    {
+      "id": "GS-01",
+      "name": "Normal pass",
+      "video": "path/to/normal_pass.mp4",
+      "expected_incident": false,
+      "expected_decision": null,
+      "max_stop_secs": 1.0,
+      "notes": "Vehicle passes through zone without stopping"
+    },
+    {
+      "id": "GS-02",
+      "name": "Long stop, no deposit",
+      "video": "path/to/long_stop.mp4",
+      "expected_incident": true,
+      "expected_decision": "Reject",
+      "max_stop_secs": 10.0,
+      "notes": "Vehicle stops but no object deposited — should be reviewed and rejected"
+    },
+    {
+      "id": "GS-03",
+      "name": "Person deposits object",
+      "video": "path/to/deposit.mp4",
+      "expected_incident": true,
+      "expected_decision": "Review",
+      "max_stop_secs": 5.0,
+      "notes": "Person deposits object near stopped vehicle — probable dumping event"
+    },
+    {
+      "id": "GS-04",
+      "name": "Waste already present",
+      "video": "path/to/waste_present.mp4",
+      "expected_incident": false,
+      "expected_decision": null,
+      "max_stop_secs": 1.0,
+      "notes": "Waste present before vehicle arrives — do not blame arriving vehicle"
+    },
+    {
+      "id": "GS-05",
+      "name": "Plate unreadable",
+      "video": "path/to/unreadable_plate.mp4",
+      "expected_incident": true,
+      "expected_decision": "Review",
+      "max_stop_secs": 5.0,
+      "notes": "Incident retained without invented plate when OCR fails"
+    },
+    {
+      "id": "GS-06",
+      "name": "Network fails",
+      "video": "path/to/network_fail.mp4",
+      "expected_incident": true,
+      "expected_decision": null,
+      "max_stop_secs": 5.0,
+      "notes": "Queue and later sync when API unavailable"
+    },
+    {
+      "id": "GS-07",
+      "name": "Duplicate event",
+      "video": "path/to/duplicate.mp4",
+      "expected_incident": true,
+      "expected_decision": null,
+      "max_stop_secs": 5.0,
+      "notes": "One incident only for repeated detections of same vehicle"
+    }
+  ]
+}
