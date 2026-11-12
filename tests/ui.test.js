@@ -31,6 +31,11 @@ function installGlobals(window) {
   window.fetch = async () => ({ ok: false, status: 404, json: async () => ({}) });
   window.requestAnimationFrame = cb => setTimeout(cb, 0);
   window.navigator.mediaDevices = { getUserMedia: async () => { throw new Error('no camera in test'); } };
+  // SSE EventSource is not available in Node; stub it so init() doesn't throw.
+  window.EventSource = class EventSource {
+    constructor() { this.onopen = null; this.onmessage = null; this.onerror = null; this.readyState = 0; }
+    close() {}
+  };
   // Node 22 exposes some globals as getter-only, so define them explicitly.
   const setGlobal = (name, value) => Object.defineProperty(
     globalThis, name, { value, writable: true, configurable: true }
@@ -46,6 +51,12 @@ function installGlobals(window) {
   setGlobal('Blob', window.Blob);
   setGlobal('HTMLElement', window.HTMLElement);
   setGlobal('HTMLCanvasElement', window.HTMLCanvasElement);
+  setGlobal('EventSource', window.EventSource);
+}
+
+// JSDOM's .click() does not reliably trigger onclick properties; use dispatchEvent instead.
+function click(el) {
+  el.dispatchEvent(new window.Event('click', { bubbles: true, cancelable: true }));
 }
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 60));
@@ -56,6 +67,10 @@ test('static prototype boots, wires tabs, and keeps claim discipline', async () 
   stubCanvas(window);
   installGlobals(window);
   const $ = id => window.document.getElementById(id);
+
+  // Sign in a test user so tab switching is permitted (auth guard wraps tab onclick)
+  window.localStorage.setItem('gvpAuthToken', 'test-token');
+  window.localStorage.setItem('gvpAuthUser', JSON.stringify({ username: 'tester', role: 'officer' }));
 
   await import('../assets/js/app.js');
   await tick();
@@ -68,30 +83,30 @@ test('static prototype boots, wires tabs, and keeps claim discipline', async () 
   assert.match($('apiStatus').textContent, /offline mode/);
 
   // Tabs
-  window.document.querySelector('.tab[data-view="history"]').click();
+  click(window.document.querySelector('.tab[data-view="history"]'));
   assert.ok($('view-history').classList.contains('active'));
   assert.ok(!$('view-live').classList.contains('active'));
 
   // Seeded sample records are clearly labelled
-  $('seedHistory').click();
+  click($('seedHistory'));
   await tick();
   assert.equal($('histTotal').textContent, '3');
   assert.match($('histBody').innerHTML, /DEMO/);
   assert.match($('histNote').textContent, /illustrative only/);
 
   // XSS through a stored plate value is neutralised
-  window.localStorage.setItem('gvpHistory', JSON.stringify([{
-    id: 'INC-XSS', time: 't', location: 'GVP-01', sceneChange: '1%',
-    plate: '<img src=x onerror=alert(1)>', decision: 'Approved for follow-up',
-    status: 'SUSPICIOUS', statusCode: 'APPROVED'
-  }]));
-  window.document.querySelector('.tab[data-view="live"]').click();
-  window.document.querySelector('.tab[data-view="history"]').click();
+  window.localStorage.setItem('gvpHistory', JSON.stringify([
+    { id: 'INC-XSS', time: 't', location: 'GVP-01', sceneChange: '1%',
+      plate: '<img src=x onerror=alert(1)>', decision: 'Approved for follow-up',
+      status: 'SUSPICIOUS', statusCode: 'APPROVED' }
+  ]));
+  click(window.document.querySelector('.tab[data-view="live"]'));
+  click(window.document.querySelector('.tab[data-view="history"]'));
   await tick();
   assert.ok(!/<img/i.test($('histBody').innerHTML));
   assert.ok($('histBody').textContent.includes('<img src=x onerror=alert(1)>'));
 
-  $('clearHistory').click();
+  click($('clearHistory'));
   await tick();
   assert.equal($('histTotal').textContent, '0');
 
@@ -100,15 +115,15 @@ test('static prototype boots, wires tabs, and keeps claim discipline', async () 
     { id: 'A', location: 'GVP-02', decision: 'Cleanup requested', time: '2026-11-01', statusCode: 'CLEANUP_REQUESTED' },
     { id: 'B', location: 'GVP-02', decision: 'Pending', time: '2026-11-02', statusCode: 'REVIEW_REQUIRED' }
   ]));
-  window.document.querySelector('.tab[data-view="map"]').click();
+  click(window.document.querySelector('.tab[data-view="map"]'));
   await tick();
-  window.document.querySelector('.pin[data-zone="GVP-02"]').click();
+  click(window.document.querySelector('.pin[data-zone="GVP-02"]'));
   assert.equal($('zoneName').textContent, 'GVP-02');
   assert.equal($('zoneCount').textContent, '2');
   assert.ok(Number($('zoneScore').textContent) > 0);
 
   // Zone editor and status codes exist
-  $('editZone').click();
+  click($('editZone'));
   assert.equal($('editZone').textContent, 'Finish editing');
   assert.equal($('saveZone').disabled, false);
   assert.equal($('statusCode').textContent, '—');
@@ -117,7 +132,7 @@ test('static prototype boots, wires tabs, and keeps claim discipline', async () 
 });
 
 test('index.html is self-contained and points at real assets', () => {
-  assert.ok(!/https?:\/\//.test(html.replace(/<!--[\s\S]*?-->/g, '')), 'no external URLs');
+  assert.ok(!/https?:\/\//.test(html.replace(/<!--[\\s\\S]*?-->/g, '')), 'no external URLs');
   const refs = [...html.matchAll(/(?:src|href)="(assets\/[^"]+)"/g)].map(m => m[1]);
   assert.ok(refs.length >= 2, 'CSS and JS are linked');
   for (const ref of refs) {
@@ -155,7 +170,7 @@ test('API mode is detected via relative /api/v1 calls', async () => {
   assert.equal($('persistenceStatus').textContent, 'API');
   assert.match($('apiStatus').textContent, /detected/);
   assert.equal($('histTotal').textContent, '1');
-  window.document.querySelector('.tab[data-view="map"]').click();
+  click(window.document.querySelector('.tab[data-view="map"]'));
   await tick();
   assert.equal($('mapSource').textContent, 'API (SQLite)');
   dom.window.close();

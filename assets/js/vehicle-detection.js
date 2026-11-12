@@ -16,6 +16,30 @@
  *   detector.stop();
  */
 
+// OpenCV.js is loaded dynamically from CDN to avoid external script tags in index.html
+let cvLoaded = false;
+
+function loadOpenCVJS() {
+  return new Promise((resolve, reject) => {
+    if (typeof window.cv !== 'undefined') {
+      cvLoaded = true;
+      resolve();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://docs.opencv.org/4.x/opencv.js';
+    script.onload = () => {
+      cvLoaded = true;
+      resolve();
+    };
+    script.onerror = () => {
+      console.warn('OpenCV.js not loaded — vehicle AI overlay unavailable in this environment');
+      resolve();
+    };
+    document.head.appendChild(script);
+  });
+}
+
 export function createVehicleDetector({
   modelPath = 'models/weights/yolo11n.onnx',
   confThreshold = 0.25,
@@ -49,7 +73,11 @@ export function createVehicleDetector({
   async function init() {
     if (active) return;
     try {
-      net = cv.dnn.readNetFromONNX(modelPath);
+      await loadOpenCVJS();
+      if (typeof window.cv === 'undefined') {
+        throw new Error('OpenCV.js failed to load');
+      }
+      net = window.cv.dnn.readNetFromONNX(modelPath);
       active = true;
     } catch (err) {
       active = false;

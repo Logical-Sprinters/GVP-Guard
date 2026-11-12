@@ -1049,6 +1049,8 @@ async function init() {
     showMain();
   }
 
+  wireEvents();
+
   await storage.check();
   updateStorageUI();
   $('stableSeconds').value = CONFIG.monitor.defaultStableSeconds;
@@ -1056,7 +1058,6 @@ async function init() {
   zoneEditor.sizeCanvas();
   zoneEditor.draw();
   $('zoneInfo').textContent = `${state.polygon.length} points • ${window.localStorage.getItem(CONFIG.zoneKey) ? 'saved polygon' : 'default rectangle'}`;
-  wireEvents();
   resetIncidentUI(true);
   await refreshHistory();
   updateMonitorUI();
