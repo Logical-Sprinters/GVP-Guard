@@ -40,3 +40,6 @@ clips/
 backend/data/
 *.db
 *.sqlite3
+
+# Signing secret (never commit)
+.secret_key

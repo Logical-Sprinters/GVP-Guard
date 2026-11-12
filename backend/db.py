@@ -1,19 +1,26 @@
-"""Minimal SQLite persistence for the GVP-Guard prototype.
+"""Object-storage backed persistence for the GVP-Guard prototype.
 
-Only metadata is stored in the database; evidence frames travel inside the
-incident payload as JPEG data URLs. No object storage or signed URLs yet —
-see docs/07_DATABASE_SCHEMA.md and docs/08_SECURITY_PRIVACY.md.
+Evidence frames are stored as individual files under DATA_DIR / 'evidence'
+with opaque storage keys. SQLite stores metadata (checksum, mime type, size,
+captured_at) plus an immutable access audit log for chain-of-custody.
+Signed, time-limited URLs gate all evidence access.
 """
+import base64
 import hashlib
+import hmac
 import json
+import os
+import secrets
 import sqlite3
 import threading
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parent / 'data'
 DB_PATH = DATA_DIR / 'gvp_guard.db'
+EVIDENCE_DIR = DATA_DIR / 'evidence'
+EVIDENCE_URL_TTL_SECONDS = 300  # signed evidence URLs expire after 5 minutes
 _LOCK = threading.Lock()
 
 
@@ -23,6 +30,7 @@ def _now():
 
 def init_db():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
+    EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
     with _LOCK, sqlite3.connect(DB_PATH) as conn:
         conn.executescript('''
             CREATE TABLE IF NOT EXISTS incidents (
@@ -79,6 +87,30 @@ def init_db():
                 created_at   TEXT NOT NULL,
                 FOREIGN KEY (user_id) REFERENCES users(id)
             );
+            CREATE TABLE IF NOT EXISTS evidence_items (
+                id             INTEGER PRIMARY KEY AUTOINCREMENT,
+                incident_id    TEXT NOT NULL,
+                kind           TEXT NOT NULL,           -- 'before' | 'during' | 'after'
+                storage_key    TEXT UNIQUE NOT NULL,    -- opaque object key
+                mime_type      TEXT NOT NULL,
+                size_bytes     INTEGER NOT NULL,
+                checksum_sha256 TEXT NOT NULL,         -- SHA-256 of the stored file
+                captured_at    TEXT,                    -- when the frame was captured
+                created_at     TEXT NOT NULL,
+                FOREIGN KEY (incident_id) REFERENCES incidents(id)
+            );
+            CREATE TABLE IF NOT EXISTS evidence_access_log (
+                id             INTEGER PRIMARY KEY AUTOINCREMENT,
+                storage_key    TEXT NOT NULL,
+                actor_id       TEXT,
+                action         TEXT NOT NULL,           -- 'view' | 'download' | 'verify'
+                accessed_at    TEXT NOT NULL,
+                ip_address     TEXT,
+                FOREIGN KEY (storage_key) REFERENCES evidence_items(storage_key)
+            );
+            CREATE INDEX IF NOT EXISTS idx_evidence_incident ON evidence_items(incident_id);
+            CREATE INDEX IF NOT EXISTS idx_evidence_storage_key ON evidence_items(storage_key);
+            CREATE INDEX IF NOT EXISTS idx_evidence_access_log ON evidence_access_log(storage_key, accessed_at);
             CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
             CREATE INDEX IF NOT EXISTS idx_user_sessions_user ON user_sessions(user_id);
         ''')
@@ -409,3 +441,217 @@ def deactivate_user(user_id: int) -> bool:
             (user_id,),
         )
         return cur.rowcount > 0
+
+
+# ============================================================================
+# Evidence object storage + chain-of-custody
+# ============================================================================
+
+def _storage_path(storage_key: str) -> Path:
+    return EVIDENCE_DIR / storage_key
+
+
+def compute_checksum(data: bytes) -> str:
+    """SHA-256 hex digest of raw bytes."""
+    return hashlib.sha256(data).hexdigest()
+
+
+def store_evidence(
+    incident_id: str,
+    kind: str,
+    data: bytes,
+    mime_type: str = 'image/jpeg',
+    captured_at: str | None = None,
+) -> dict:
+    """Store an evidence file under an opaque key, record metadata + checksum.
+
+    Returns the evidence item dict including the storage_key.
+    The file is written atomically (temp file + rename) so a crash never
+    leaves a partial file visible.
+    """
+    if kind not in ('before', 'during', 'after'):
+        raise ValueError("kind must be 'before', 'during' or 'after'")
+    checksum = compute_checksum(data)
+    storage_key = f"ev-{secrets.token_urlsafe(16)}"
+    path = _storage_path(storage_key)
+    tmp = path.with_suffix('.tmp')
+    with _LOCK:
+        with open(tmp, 'wb') as f:
+            f.write(data)
+        os.replace(tmp, path)
+        now = _now()
+        item = None
+        with sqlite3.connect(DB_PATH) as c:
+            c.execute(
+                '''INSERT INTO evidence_items
+                   (incident_id, kind, storage_key, mime_type, size_bytes,
+                    checksum_sha256, captured_at, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                (incident_id, kind, storage_key, mime_type, len(data),
+                 checksum, captured_at or now, now),
+            )
+            cur = c.execute(
+                'SELECT * FROM evidence_items WHERE storage_key = ?', (storage_key,)
+            )
+            row = cur.fetchone()
+            if row:
+                item = {
+                    'id': row[0],
+                    'incident_id': row[1],
+                    'kind': row[2],
+                    'storage_key': row[3],
+                    'mime_type': row[4],
+                    'size_bytes': row[5],
+                    'checksum_sha256': row[6],
+                    'captured_at': row[7],
+                    'created_at': row[8],
+                }
+    return item
+
+
+def get_evidence_item(storage_key: str) -> dict | None:
+    """Return metadata for a stored evidence item, or None."""
+    with connection() as conn:
+        row = conn.execute(
+            'SELECT * FROM evidence_items WHERE storage_key = ?', (storage_key,)
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def read_evidence_file(storage_key: str) -> bytes | None:
+    """Read raw evidence file bytes, or None if missing."""
+    path = _storage_path(storage_key)
+    if not path.exists():
+        return None
+    with _LOCK:
+        with open(path, 'rb') as f:
+            return f.read()
+
+
+def list_evidence_for_incident(incident_id: str) -> list[dict]:
+    """List all evidence items for an incident, newest first."""
+    with connection() as conn:
+        rows = conn.execute(
+            '''SELECT * FROM evidence_items
+               WHERE incident_id = ?
+               ORDER BY created_at DESC, id DESC''',
+            (incident_id,),
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def log_evidence_access(
+    storage_key: str,
+    actor_id: str | None,
+    action: str,
+    ip_address: str | None = None,
+) -> None:
+    """Append an immutable chain-of-custody access record."""
+    if action not in ('view', 'download', 'verify'):
+        raise ValueError("action must be 'view', 'download' or 'verify'")
+    with connection() as conn:
+        conn.execute(
+            '''INSERT INTO evidence_access_log
+               (storage_key, actor_id, action, accessed_at, ip_address)
+               VALUES (?, ?, ?, ?, ?)''',
+            (storage_key, actor_id, action, _now(), ip_address),
+        )
+
+
+def verify_checksum(storage_key: str) -> dict:
+    """Verify stored file against its recorded checksum."""
+    item = get_evidence_item(storage_key)
+    if item is None:
+        return {'ok': False, 'error': 'evidence not found'}
+    data = read_evidence_file(storage_key)
+    if data is None:
+        return {'ok': False, 'error': 'evidence file missing on disk'}
+    actual = compute_checksum(data)
+    expected = item['checksum_sha256']
+    ok = hmac.compare_digest(actual, expected)
+    log_evidence_access(storage_key, None, 'verify')
+    return {
+        'ok': ok,
+        'storage_key': storage_key,
+        'expected_checksum': expected,
+        'actual_checksum': actual,
+    }
+
+
+# -- signed, time-limited evidence URLs --------------------------------------
+
+_SIGNING_SECRET = Path(__file__).resolve().parent.parent.joinpath(
+    '.secret_key'
+).read_text().strip() if Path(__file__).resolve().parent.parent.joinpath(
+    '.secret_key'
+).exists() else 'gvp-guard-dev-secret-change-in-production'
+
+
+def generate_signed_url(storage_key: str, ttl_seconds: int = EVIDENCE_URL_TTL_SECONDS) -> str:
+    """Generate a time-limited signed evidence URL token.
+
+    Token format: storage_key:expiry:signature (HMAC-SHA256).
+    """
+    expiry = int((datetime.now(timezone.utc) + timedelta(seconds=ttl_seconds)).timestamp())
+    message = f"{storage_key}:{expiry}"
+    sig = hmac.new(_SIGNING_SECRET.encode('utf-8'), message.encode('utf-8'), hashlib.sha256).hexdigest()
+    token = base64.urlsafe_b64encode(f"{message}:{sig}".encode('utf-8')).decode('utf-8').rstrip('=')
+    return token
+
+
+def verify_signed_url(token: str) -> dict | None:
+    """Verify a signed evidence URL token. Returns the storage_key or None."""
+    try:
+        padded = token + '=' * (4 - len(token) % 4) if len(token) % 4 else token
+        raw = base64.urlsafe_b64decode(padded.encode('utf-8')).decode('utf-8')
+        parts = raw.split(':')
+        if len(parts) != 3:
+            return None
+        storage_key, expiry_str, sig = parts
+        expiry = int(expiry_str)
+        if datetime.now(timezone.utc).timestamp() > expiry:
+            return None  # expired
+        message = f"{storage_key}:{expiry_str}"
+        expected_sig = hmac.new(_SIGNING_SECRET.encode('utf-8'), message.encode('utf-8'), hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(sig, expected_sig):
+            return None  # tampered
+        return {'storage_key': storage_key}
+    except Exception:
+        return None
+
+
+def get_evidence_access_log(storage_key: str) -> list[dict]:
+    """Return the chain-of-custody access log for an evidence item."""
+    with connection() as conn:
+        rows = conn.execute(
+            '''SELECT * FROM evidence_access_log
+               WHERE storage_key = ?
+               ORDER BY accessed_at DESC, id DESC''',
+            (storage_key,),
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def delete_expired_evidence(older_than_days: int = 90) -> int:
+    """Retention job: delete evidence items and files older than N days.
+
+    Returns the number of items deleted.
+    """
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=older_than_days)).isoformat()
+    with _LOCK:
+        with sqlite3.connect(DB_PATH) as conn:
+            rows = conn.execute(
+                'SELECT storage_key FROM evidence_items WHERE created_at < ?',
+                (cutoff,),
+            ).fetchall()
+            deleted = 0
+            for row in rows:
+                storage_key = row['storage_key']
+                path = _storage_path(storage_key)
+                if path.exists():
+                    path.unlink()
+                    deleted += 1
+                conn.execute('DELETE FROM evidence_access_log WHERE storage_key = ?', (storage_key,))
+                conn.execute('DELETE FROM evidence_items WHERE storage_key = ?', (storage_key,))
+            conn.commit()
+    return deleted

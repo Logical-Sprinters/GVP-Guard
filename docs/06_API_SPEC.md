@@ -24,10 +24,13 @@ Base path: `/api/v1`
 - `GET /incidents/{id}/audit`
 - `GET /incidents/{id}/export`
 
-## Evidence
-- `POST /incidents/{id}/evidence`
-- `GET /incidents/{id}/evidence`
-- `GET /evidence/{id}/download`
+## Evidence (object storage)
+- `POST /incidents/{id}/evidence` — upload a frame (base64 body); returns storage_key + signed URL
+- `GET /incidents/{id}/evidence` — list evidence items with signed, time-limited URLs
+- `GET /evidence/{storage_key}` — get a signed URL for viewing/downloading
+- `GET /evidence/{storage_key}/download?token=<signed_url>` — download with signed URL token
+- `GET /evidence/{storage_key}/checksum` — verify SHA-256 integrity
+- `GET /evidence/{storage_key}/access-log` — chain-of-custody access log (officer+)
 
 ## GVP analytics
 - `GET /gvps`
@@ -52,6 +55,7 @@ Use UUIDs, ISO-8601 UTC timestamps, pagination, role checks, validation, idempot
 `backend/app.py` now serves this API on the same origin as the static app:
 
 - Implemented: `GET /health`; `GET`, `POST`, `DELETE /incidents`; `GET`, `PATCH /incidents/{id}`; `POST /incidents/{id}/decision`; `POST /incidents/{id}/cleanup-request`; `GET /incidents/{id}/cleanup-request`; `GET /cleanup-requests`; `PATCH /cleanup-requests/{id}`; `GET /incidents/{id}/evidence`; `GET /evidence/{incident_id}/{frame}`; `GET /incidents/{id}/audit`; `GET /incidents/{id}/export`; `GET /gvps`; `GET /analytics/summary`.
-- Still draft: cameras/zones, analysis jobs, events, authentication and role checks, pagination, idempotency keys and consistent error envelopes.
+- Implemented: evidence object storage (`POST/GET /incidents/{id}/evidence`, `GET /evidence/{storage_key}`, `GET /evidence/{storage_key}/download`, `GET /evidence/{storage_key}/checksum`, `GET /evidence/{storage_key}/access-log`), signed time-limited URLs, SHA-256 checksums, chain-of-custody access log, rate limiting, security headers.
+- Still draft: cameras/zones, analysis jobs, events, pagination, idempotency keys and consistent error envelopes.
 
 See [`../backend/README.md`](../backend/README.md) for run instructions.

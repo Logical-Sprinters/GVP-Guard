@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.6.0] — Platform Hardening: Evidence Storage, Security & Rate Limiting (2026-11-06)
+
+### Added
+- `backend/db.py`: `evidence_items` and `evidence_access_log` tables; `store_evidence()`, `get_evidence_item()`, `read_evidence_file()`, `list_evidence_for_incident()`, `log_evidence_access()`, `verify_checksum()`, `generate_signed_url()`, `verify_signed_url()`, `get_evidence_access_log()`, `delete_expired_evidence()`; `EVIDENCE_DIR` object storage under `data/evidence/`
+- `backend/app.py`: evidence object storage endpoints (`POST/GET /incidents/{id}/evidence`, `GET /evidence/{storage_key}`, `GET /evidence/{storage_key}/download`, `GET /evidence/{storage_key}/checksum`, `GET /evidence/{storage_key}/access-log`); rate limiting middleware (sliding window per client IP); security headers middleware (CSP, nosniff, DENY, no-referrer, Permissions-Policy)
+- `backend/schemas.py`: `EvidenceItemOut`, `EvidenceUploadIn`, `EvidenceAccessLogOut`, `ChecksumVerifyOut` schemas
+- `assets/js/storage.js`: `uploadEvidence()`, `getEvidenceSignedUrl()`, `downloadEvidence()` (signed URL token flow), `verifyChecksum()`; evidence frames stripped from API payloads, uploaded separately to object storage
+- `assets/js/app.js`: evidence frames uploaded to object storage after incident creation (API mode); offline mode keeps data URLs in localStorage
+- `docs/06_API_SPEC.md`, `docs/07_DATABASE_SCHEMA.md`, `docs/08_SECURITY_PRIVACY.md`: updated for evidence object storage, checksums, chain-of-custody, rate limiting, security headers
+
+### Changed
+- `backend/app.py`: version 0.3.0; evidence endpoints now use object storage with signed URLs instead of embedded data URLs
+- `docs/15_IMPLEMENTATION_STATUS.md`: evidence storage, rate limiting, security headers moved from NOT implemented to implemented
+
+### Honesty notes
+- Evidence integrity: SHA-256 checksums at ingest + chain-of-custody access log — NOT legal chain of custody until formally reviewed
+- Rate limiting: in-memory sliding window, resets on server restart
+- All Step 4 features remain DEMO STAGE — stop time alone does NOT imply guilt
+- No accuracy/false-alert/impact figures without documented calibration tests
+- Human review mandatory — no automatic fines or guilt
+
 ## [0.5.0] — MVP-2 Pilot & Field Validation (planning / partial implementation) (2026-11-07)
 
 MVP-2 plan and tooling added. All Step 4 features remain DEMO STAGE — not WORKING until benchmarked on a held-out test set. No accuracy figures published.

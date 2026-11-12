@@ -86,3 +86,45 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: str | None = None
     role: str | None = None
+
+
+# ============================================================================
+# Evidence object storage schemas
+# ============================================================================
+
+class EvidenceItemOut(BaseModel):
+    id: int
+    incident_id: str
+    kind: str
+    storage_key: str
+    mime_type: str
+    size_bytes: int
+    checksum_sha256: str
+    captured_at: str | None = None
+    created_at: str
+    signed_url: str | None = None
+
+
+class EvidenceUploadIn(BaseModel):
+    incident_id: str
+    kind: str
+    storage_key: str  # base64-encoded file data
+    mime_type: str = 'image/jpeg'
+    captured_at: str | None = None
+
+
+class EvidenceAccessLogOut(BaseModel):
+    id: int
+    storage_key: str
+    actor_id: str | None = None
+    action: str
+    accessed_at: str
+    ip_address: str | None = None
+
+
+class ChecksumVerifyOut(BaseModel):
+    ok: bool
+    storage_key: str
+    expected_checksum: str | None = None
+    actual_checksum: str | None = None
+    error: str | None = None
