@@ -1,0 +1,41 @@
+[
+  {
+    "timestamp_utc": "2026-11-12T16:54:31.775392+00:00",
+    "git": {
+      "commit": "92094a1",
+      "branch": "master",
+      "commit_date": "2026-11-12 16:38:53 +0000",
+      "commit_message": "ci: Add GitHub Actions CI/CD pipeline"
+    },
+    "model_version": "yolo11n",
+    "dataset_version": "synthetic-v1",
+    "hardware": "CPU (sandbox)",
+    "footage_conditions": "Synthetic daytime, 640x480, 25fps, car crops composited on road background",
+    "limitations": "Person detection not validated (synthetic figures not detected by YOLO11n). Plate OCR not validated (no readable plates in synthetic car crops). Vehicle detection calibration shows 0 precision due to ground truth box-position mismatch. All metrics are DEMO STAGE \u2014 not WORKING until validated on held-out real footage with annotated persons and plates.",
+    "test_results_file": "tests/data/scenarios/test_results.json",
+    "test_results_hash": "d6251cfd3170ef2f44297b8f4f27373faa03545fc83d82a9c29045bae65520b4",
+    "kpi_results_file": "tests/data/scenarios/kpi_results.json",
+    "kpi_results_hash": "2e121849f77a7527f57959168ea5be88a4de80189b043d78ad55085511ef725b",
+    "scenario_summary": {
+      "total_scenarios": 7,
+      "passed": 2,
+      "failed": 5,
+      "pass_rate": 0.2857
+    },
+    "kpi_summary": {
+      "scenario_pass_rate": 0.2857,
+      "plate_read_rate": 0.0,
+      "evidence_completeness": 0.0,
+      "false_alerts_per_camera_hour": 1.1429,
+      "dumping_event_precision": 0.0
+    },
+    "honesty_notes": [
+      "All metrics are targets to measure, never published without documented tests.",
+      "Hardware, footage conditions, and sample size are recorded with every result.",
+      "Test records are append-only \u2014 never modify or delete historical records.",
+      "Human review mandatory \u2014 no automatic fines.",
+      "Stop time alone does NOT imply guilt.",
+      "No GMC/registry/e-challan integration."
+    ]
+  }
+]

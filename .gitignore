@@ -43,3 +43,6 @@ backend/data/
 
 # Signing secret (never commit)
 .secret_key
+
+# Model weights (external dependency — not committed)
+models/weights/

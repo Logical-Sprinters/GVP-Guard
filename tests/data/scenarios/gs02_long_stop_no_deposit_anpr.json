@@ -1,0 +1,62 @@
+{
+  "timestamp_utc": "2026-11-12T16:50:08.740910+00:00",
+  "source": "tests/data/scenarios/gs02_long_stop_no_deposit.mp4",
+  "weights": "models/weights/yolo11n.pt",
+  "plate_weights": null,
+  "tracker": "bytetrack.yaml",
+  "device": "cpu",
+  "polygon": [
+    {
+      "x": 0.1,
+      "y": 0.6
+    },
+    {
+      "x": 0.9,
+      "y": 0.6
+    },
+    {
+      "x": 0.9,
+      "y": 1.0
+    },
+    {
+      "x": 0.1,
+      "y": 1.0
+    }
+  ],
+  "ocr_languages": [
+    "en"
+  ],
+  "ocr_conf_threshold": 0.2,
+  "stop_threshold_secs": 2.0,
+  "frames_processed": 150,
+  "total_frames_available": 150,
+  "load_seconds": 0.029,
+  "wall_seconds": 10.009,
+  "effective_fps": 14.99,
+  "total_tracks": 1,
+  "incident_candidates": [],
+  "tracks": [
+    {
+      "track_id": 1,
+      "vehicle_type": "car",
+      "first_seen_frame": 12,
+      "last_frame": 149,
+      "max_confidence": 0.85,
+      "in_polygon_final": false,
+      "stop_events": [
+        {
+          "start_frame": 14,
+          "end_frame": 150,
+          "duration_secs": 5.44
+        }
+      ],
+      "total_stop_secs": 5.44,
+      "long_stop_count": 1,
+      "longest_stop_secs": 5.44,
+      "plate_consensus": null,
+      "plate_reads": [],
+      "dumping_cues": [],
+      "dumping_cue_count": 0
+    }
+  ]
+}

@@ -1,0 +1,401 @@
+{
+  "timestamp_utc": "2026-11-12T16:52:25.672616+00:00",
+  "scenarios_file": "tests/data/scenarios/scenarios.json",
+  "weights": "models/weights/yolo11n.pt",
+  "tracker": "bytetrack.yaml",
+  "device": "cpu",
+  "stop_threshold_secs": 2.0,
+  "total_scenarios": 7,
+  "passed": 2,
+  "failed": 5,
+  "pass_rate": 0.2857,
+  "results": [
+    {
+      "id": "GS-01",
+      "name": "01_Normal_Pass",
+      "video": "/home/user/repo/tests/data/scenarios/gs01_normal_pass.mp4",
+      "passed": false,
+      "reasons": [
+        "Unexpected incident indicators detected",
+        "Max stop 2.96s exceeds expected 1.0s"
+      ],
+      "metrics": {
+        "video": "/home/user/repo/tests/data/scenarios/gs01_normal_pass.mp4",
+        "fps": 25.0,
+        "total_frames": 150,
+        "processed_frames": 150,
+        "wall_seconds": 10.666,
+        "effective_fps": 14.06,
+        "total_tracks": 1,
+        "long_stops": 1,
+        "max_stop_secs": 2.96,
+        "dumping_cue_frames": 0,
+        "person_overlap_frames": 0,
+        "tracks": [
+          {
+            "track_id": 1,
+            "vehicle_type": "car",
+            "stop_events": [
+              {
+                "start_frame": 39,
+                "end_frame": 113,
+                "duration_secs": 2.96
+              }
+            ],
+            "total_stop_secs": 2.96,
+            "long_stop_count": 1,
+            "dumping_cue_frames": 0,
+            "person_overlap_frames": 0
+          }
+        ]
+      },
+      "evaluation": {
+        "expected_incident": false,
+        "expected_decision": null,
+        "max_stop_secs": 1.0,
+        "actual_max_stop_secs": 2.96,
+        "actual_long_stops": 1,
+        "actual_dumping_cue_frames": 0
+      }
+    },
+    {
+      "id": "GS-02",
+      "name": "02_Long_Stop_No_Deposit",
+      "video": "/home/user/repo/tests/data/scenarios/gs02_long_stop_no_deposit.mp4",
+      "passed": true,
+      "reasons": [],
+      "metrics": {
+        "video": "/home/user/repo/tests/data/scenarios/gs02_long_stop_no_deposit.mp4",
+        "fps": 25.0,
+        "total_frames": 150,
+        "processed_frames": 150,
+        "wall_seconds": 9.357,
+        "effective_fps": 16.03,
+        "total_tracks": 1,
+        "long_stops": 1,
+        "max_stop_secs": 5.44,
+        "dumping_cue_frames": 0,
+        "person_overlap_frames": 0,
+        "tracks": [
+          {
+            "track_id": 4,
+            "vehicle_type": "car",
+            "stop_events": [
+              {
+                "start_frame": 14,
+                "end_frame": 150,
+                "duration_secs": 5.44
+              }
+            ],
+            "total_stop_secs": 5.44,
+            "long_stop_count": 1,
+            "dumping_cue_frames": 0,
+            "person_overlap_frames": 0
+          }
+        ]
+      },
+      "evaluation": {
+        "expected_incident": true,
+        "expected_decision": "Reject",
+        "max_stop_secs": 10.0,
+        "actual_max_stop_secs": 5.44,
+        "actual_long_stops": 1,
+        "actual_dumping_cue_frames": 0
+      }
+    },
+    {
+      "id": "GS-03",
+      "name": "03_Person_Deposits",
+      "video": "/home/user/repo/tests/data/scenarios/gs03_person_deposits.mp4",
+      "passed": false,
+      "reasons": [
+        "Max stop 5.36s exceeds expected 5.0s"
+      ],
+      "metrics": {
+        "video": "/home/user/repo/tests/data/scenarios/gs03_person_deposits.mp4",
+        "fps": 25.0,
+        "total_frames": 150,
+        "processed_frames": 150,
+        "wall_seconds": 9.808,
+        "effective_fps": 15.29,
+        "total_tracks": 2,
+        "long_stops": 1,
+        "max_stop_secs": 5.36,
+        "dumping_cue_frames": 0,
+        "person_overlap_frames": 0,
+        "tracks": [
+          {
+            "track_id": 5,
+            "vehicle_type": "car",
+            "stop_events": [
+              {
+                "start_frame": 16,
+                "end_frame": 150,
+                "duration_secs": 5.36
+              }
+            ],
+            "total_stop_secs": 5.36,
+            "long_stop_count": 1,
+            "dumping_cue_frames": 0,
+            "person_overlap_frames": 0
+          },
+          {
+            "track_id": 6,
+            "vehicle_type": "car",
+            "stop_events": [
+              {
+                "start_frame": 101,
+                "end_frame": 147,
+                "duration_secs": 1.84
+              }
+            ],
+            "total_stop_secs": 1.84,
+            "long_stop_count": 0,
+            "dumping_cue_frames": 0,
+            "person_overlap_frames": 0
+          }
+        ]
+      },
+      "evaluation": {
+        "expected_incident": true,
+        "expected_decision": "Review",
+        "max_stop_secs": 5.0,
+        "actual_max_stop_secs": 5.36,
+        "actual_long_stops": 1,
+        "actual_dumping_cue_frames": 0
+      }
+    },
+    {
+      "id": "GS-04",
+      "name": "04_Waste_Present",
+      "video": "/home/user/repo/tests/data/scenarios/gs04_waste_present.mp4",
+      "passed": false,
+      "reasons": [
+        "Unexpected incident indicators detected",
+        "Max stop 2.2s exceeds expected 1.0s"
+      ],
+      "metrics": {
+        "video": "/home/user/repo/tests/data/scenarios/gs04_waste_present.mp4",
+        "fps": 25.0,
+        "total_frames": 150,
+        "processed_frames": 150,
+        "wall_seconds": 9.645,
+        "effective_fps": 15.55,
+        "total_tracks": 1,
+        "long_stops": 1,
+        "max_stop_secs": 2.2,
+        "dumping_cue_frames": 0,
+        "person_overlap_frames": 0,
+        "tracks": [
+          {
+            "track_id": 10,
+            "vehicle_type": "car",
+            "stop_events": [
+              {
+                "start_frame": 17,
+                "end_frame": 72,
+                "duration_secs": 2.2
+              }
+            ],
+            "total_stop_secs": 2.2,
+            "long_stop_count": 1,
+            "dumping_cue_frames": 0,
+            "person_overlap_frames": 0
+          }
+        ]
+      },
+      "evaluation": {
+        "expected_incident": false,
+        "expected_decision": null,
+        "max_stop_secs": 1.0,
+        "actual_max_stop_secs": 2.2,
+        "actual_long_stops": 1,
+        "actual_dumping_cue_frames": 0
+      }
+    },
+    {
+      "id": "GS-05",
+      "name": "05_Plate_Unreadable",
+      "video": "/home/user/repo/tests/data/scenarios/gs05_plate_unreadable.mp4",
+      "passed": false,
+      "reasons": [
+        "Max stop 5.56s exceeds expected 5.0s"
+      ],
+      "metrics": {
+        "video": "/home/user/repo/tests/data/scenarios/gs05_plate_unreadable.mp4",
+        "fps": 25.0,
+        "total_frames": 150,
+        "processed_frames": 150,
+        "wall_seconds": 9.325,
+        "effective_fps": 16.09,
+        "total_tracks": 2,
+        "long_stops": 1,
+        "max_stop_secs": 5.56,
+        "dumping_cue_frames": 0,
+        "person_overlap_frames": 0,
+        "tracks": [
+          {
+            "track_id": 11,
+            "vehicle_type": "car",
+            "stop_events": [
+              {
+                "start_frame": 11,
+                "end_frame": 150,
+                "duration_secs": 5.56
+              }
+            ],
+            "total_stop_secs": 5.56,
+            "long_stop_count": 1,
+            "dumping_cue_frames": 0,
+            "person_overlap_frames": 0
+          },
+          {
+            "track_id": 13,
+            "vehicle_type": "car",
+            "stop_events": [
+              {
+                "start_frame": 114,
+                "end_frame": 150,
+                "duration_secs": 1.44
+              }
+            ],
+            "total_stop_secs": 1.44,
+            "long_stop_count": 0,
+            "dumping_cue_frames": 0,
+            "person_overlap_frames": 0
+          }
+        ]
+      },
+      "evaluation": {
+        "expected_incident": true,
+        "expected_decision": "Review",
+        "max_stop_secs": 5.0,
+        "actual_max_stop_secs": 5.56,
+        "actual_long_stops": 1,
+        "actual_dumping_cue_frames": 0
+      }
+    },
+    {
+      "id": "GS-06",
+      "name": "06_Network_Fail",
+      "video": "/home/user/repo/tests/data/scenarios/gs06_network_fail.mp4",
+      "passed": false,
+      "reasons": [
+        "Max stop 5.36s exceeds expected 5.0s"
+      ],
+      "metrics": {
+        "video": "/home/user/repo/tests/data/scenarios/gs06_network_fail.mp4",
+        "fps": 25.0,
+        "total_frames": 150,
+        "processed_frames": 150,
+        "wall_seconds": 9.386,
+        "effective_fps": 15.98,
+        "total_tracks": 2,
+        "long_stops": 1,
+        "max_stop_secs": 5.36,
+        "dumping_cue_frames": 0,
+        "person_overlap_frames": 0,
+        "tracks": [
+          {
+            "track_id": 14,
+            "vehicle_type": "car",
+            "stop_events": [
+              {
+                "start_frame": 16,
+                "end_frame": 150,
+                "duration_secs": 5.36
+              }
+            ],
+            "total_stop_secs": 5.36,
+            "long_stop_count": 1,
+            "dumping_cue_frames": 0,
+            "person_overlap_frames": 0
+          },
+          {
+            "track_id": 16,
+            "vehicle_type": "car",
+            "stop_events": [
+              {
+                "start_frame": 102,
+                "end_frame": 150,
+                "duration_secs": 1.92
+              }
+            ],
+            "total_stop_secs": 1.92,
+            "long_stop_count": 0,
+            "dumping_cue_frames": 0,
+            "person_overlap_frames": 0
+          }
+        ]
+      },
+      "evaluation": {
+        "expected_incident": true,
+        "expected_decision": null,
+        "max_stop_secs": 5.0,
+        "actual_max_stop_secs": 5.36,
+        "actual_long_stops": 1,
+        "actual_dumping_cue_frames": 0
+      }
+    },
+    {
+      "id": "GS-07",
+      "name": "07_Duplicate_Event",
+      "video": "/home/user/repo/tests/data/scenarios/gs07_duplicate_event.mp4",
+      "passed": true,
+      "reasons": [],
+      "metrics": {
+        "video": "/home/user/repo/tests/data/scenarios/gs07_duplicate_event.mp4",
+        "fps": 25.0,
+        "total_frames": 150,
+        "processed_frames": 150,
+        "wall_seconds": 9.584,
+        "effective_fps": 15.65,
+        "total_tracks": 2,
+        "long_stops": 1,
+        "max_stop_secs": 2.88,
+        "dumping_cue_frames": 0,
+        "person_overlap_frames": 0,
+        "tracks": [
+          {
+            "track_id": 17,
+            "vehicle_type": "car",
+            "stop_events": [
+              {
+                "start_frame": 21,
+                "end_frame": 93,
+                "duration_secs": 2.88
+              }
+            ],
+            "total_stop_secs": 2.88,
+            "long_stop_count": 1,
+            "dumping_cue_frames": 0,
+            "person_overlap_frames": 0
+          },
+          {
+            "track_id": 19,
+            "vehicle_type": "car",
+            "stop_events": [
+              {
+                "start_frame": 111,
+                "end_frame": 150,
+                "duration_secs": 1.56
+              }
+            ],
+            "total_stop_secs": 1.56,
+            "long_stop_count": 0,
+            "dumping_cue_frames": 0,
+            "person_overlap_frames": 0
+          }
+        ]
+      },
+      "evaluation": {
+        "expected_incident": true,
+        "expected_decision": null,
+        "max_stop_secs": 5.0,
+        "actual_max_stop_secs": 2.88,
+        "actual_long_stops": 1,
+        "actual_dumping_cue_frames": 0
+      }
+    }
+  ]
+}

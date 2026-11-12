@@ -1,0 +1,21 @@
+{
+  "timestamp_utc": "2026-11-12T16:48:08.363647+00:00",
+  "source": "tests/data/scenarios/gs07_duplicate_event.mp4",
+  "weights": "models/weights/yolo11n.pt",
+  "device": "cpu",
+  "conf_threshold": 0.25,
+  "imgsz": 640,
+  "frames_processed": 150,
+  "load_seconds": 0.03,
+  "wall_seconds": 12.132,
+  "effective_fps": 12.36,
+  "avg_inference_ms": 79.8,
+  "p95_inference_ms": 92.77,
+  "p99_inference_ms": 105.53,
+  "total_detections": 119,
+  "vehicle_detections": 119,
+  "detections_by_class": {
+    "car": 119
+  },
+  "source_fps": 25.0
+}

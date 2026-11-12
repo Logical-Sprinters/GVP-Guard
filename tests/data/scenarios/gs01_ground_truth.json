@@ -1,0 +1,2116 @@
+{
+  "fps": 25,
+  "notes": "Ground truth for GS-01: Normal pass. Car passes through zone without stopping.",
+  "frames": [
+    {
+      "frame": 0,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 1,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 2,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 3,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 4,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 5,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 6,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 7,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 8,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 9,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 10,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 11,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 12,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 13,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 14,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 15,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 16,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 17,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 18,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 19,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 20,
+      "vehicles": [
+        {
+          "box": [
+            -50,
+            330,
+            50,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 21,
+      "vehicles": [
+        {
+          "box": [
+            -45,
+            330,
+            55,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 22,
+      "vehicles": [
+        {
+          "box": [
+            -40,
+            330,
+            60,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 23,
+      "vehicles": [
+        {
+          "box": [
+            -35,
+            330,
+            65,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 24,
+      "vehicles": [
+        {
+          "box": [
+            -30,
+            330,
+            70,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 25,
+      "vehicles": [
+        {
+          "box": [
+            -25,
+            330,
+            75,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 26,
+      "vehicles": [
+        {
+          "box": [
+            -20,
+            330,
+            80,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 27,
+      "vehicles": [
+        {
+          "box": [
+            -15,
+            330,
+            85,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 28,
+      "vehicles": [
+        {
+          "box": [
+            -10,
+            330,
+            90,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 29,
+      "vehicles": [
+        {
+          "box": [
+            -5,
+            330,
+            95,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 30,
+      "vehicles": [
+        {
+          "box": [
+            0,
+            330,
+            100,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 31,
+      "vehicles": [
+        {
+          "box": [
+            5,
+            330,
+            105,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 32,
+      "vehicles": [
+        {
+          "box": [
+            10,
+            330,
+            110,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 33,
+      "vehicles": [
+        {
+          "box": [
+            15,
+            330,
+            115,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 34,
+      "vehicles": [
+        {
+          "box": [
+            20,
+            330,
+            120,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 35,
+      "vehicles": [
+        {
+          "box": [
+            25,
+            330,
+            125,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 36,
+      "vehicles": [
+        {
+          "box": [
+            30,
+            330,
+            130,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 37,
+      "vehicles": [
+        {
+          "box": [
+            35,
+            330,
+            135,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 38,
+      "vehicles": [
+        {
+          "box": [
+            40,
+            330,
+            140,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 39,
+      "vehicles": [
+        {
+          "box": [
+            45,
+            330,
+            145,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 40,
+      "vehicles": [
+        {
+          "box": [
+            50,
+            330,
+            150,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 41,
+      "vehicles": [
+        {
+          "box": [
+            55,
+            330,
+            155,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 42,
+      "vehicles": [
+        {
+          "box": [
+            60,
+            330,
+            160,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 43,
+      "vehicles": [
+        {
+          "box": [
+            65,
+            330,
+            165,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 44,
+      "vehicles": [
+        {
+          "box": [
+            70,
+            330,
+            170,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 45,
+      "vehicles": [
+        {
+          "box": [
+            75,
+            330,
+            175,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 46,
+      "vehicles": [
+        {
+          "box": [
+            80,
+            330,
+            180,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 47,
+      "vehicles": [
+        {
+          "box": [
+            85,
+            330,
+            185,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 48,
+      "vehicles": [
+        {
+          "box": [
+            90,
+            330,
+            190,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 49,
+      "vehicles": [
+        {
+          "box": [
+            95,
+            330,
+            195,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 50,
+      "vehicles": [
+        {
+          "box": [
+            100,
+            330,
+            200,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 51,
+      "vehicles": [
+        {
+          "box": [
+            105,
+            330,
+            205,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 52,
+      "vehicles": [
+        {
+          "box": [
+            110,
+            330,
+            210,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 53,
+      "vehicles": [
+        {
+          "box": [
+            115,
+            330,
+            215,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 54,
+      "vehicles": [
+        {
+          "box": [
+            120,
+            330,
+            220,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 55,
+      "vehicles": [
+        {
+          "box": [
+            125,
+            330,
+            225,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 56,
+      "vehicles": [
+        {
+          "box": [
+            130,
+            330,
+            230,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 57,
+      "vehicles": [
+        {
+          "box": [
+            135,
+            330,
+            235,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 58,
+      "vehicles": [
+        {
+          "box": [
+            140,
+            330,
+            240,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 59,
+      "vehicles": [
+        {
+          "box": [
+            145,
+            330,
+            245,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 60,
+      "vehicles": [
+        {
+          "box": [
+            150,
+            330,
+            250,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 61,
+      "vehicles": [
+        {
+          "box": [
+            155,
+            330,
+            255,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 62,
+      "vehicles": [
+        {
+          "box": [
+            160,
+            330,
+            260,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 63,
+      "vehicles": [
+        {
+          "box": [
+            165,
+            330,
+            265,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 64,
+      "vehicles": [
+        {
+          "box": [
+            170,
+            330,
+            270,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 65,
+      "vehicles": [
+        {
+          "box": [
+            175,
+            330,
+            275,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 66,
+      "vehicles": [
+        {
+          "box": [
+            180,
+            330,
+            280,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 67,
+      "vehicles": [
+        {
+          "box": [
+            185,
+            330,
+            285,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 68,
+      "vehicles": [
+        {
+          "box": [
+            190,
+            330,
+            290,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 69,
+      "vehicles": [
+        {
+          "box": [
+            195,
+            330,
+            295,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 70,
+      "vehicles": [
+        {
+          "box": [
+            200,
+            330,
+            300,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 71,
+      "vehicles": [
+        {
+          "box": [
+            205,
+            330,
+            305,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 72,
+      "vehicles": [
+        {
+          "box": [
+            210,
+            330,
+            310,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 73,
+      "vehicles": [
+        {
+          "box": [
+            215,
+            330,
+            315,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 74,
+      "vehicles": [
+        {
+          "box": [
+            220,
+            330,
+            320,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 75,
+      "vehicles": [
+        {
+          "box": [
+            225,
+            330,
+            325,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 76,
+      "vehicles": [
+        {
+          "box": [
+            230,
+            330,
+            330,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 77,
+      "vehicles": [
+        {
+          "box": [
+            235,
+            330,
+            335,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 78,
+      "vehicles": [
+        {
+          "box": [
+            240,
+            330,
+            340,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 79,
+      "vehicles": [
+        {
+          "box": [
+            245,
+            330,
+            345,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 80,
+      "vehicles": [
+        {
+          "box": [
+            250,
+            330,
+            350,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 81,
+      "vehicles": [
+        {
+          "box": [
+            255,
+            330,
+            355,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 82,
+      "vehicles": [
+        {
+          "box": [
+            260,
+            330,
+            360,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 83,
+      "vehicles": [
+        {
+          "box": [
+            265,
+            330,
+            365,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 84,
+      "vehicles": [
+        {
+          "box": [
+            270,
+            330,
+            370,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 85,
+      "vehicles": [
+        {
+          "box": [
+            275,
+            330,
+            375,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 86,
+      "vehicles": [
+        {
+          "box": [
+            280,
+            330,
+            380,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 87,
+      "vehicles": [
+        {
+          "box": [
+            285,
+            330,
+            385,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 88,
+      "vehicles": [
+        {
+          "box": [
+            290,
+            330,
+            390,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 89,
+      "vehicles": [
+        {
+          "box": [
+            295,
+            330,
+            395,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 90,
+      "vehicles": [
+        {
+          "box": [
+            300,
+            330,
+            400,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 91,
+      "vehicles": [
+        {
+          "box": [
+            305,
+            330,
+            405,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 92,
+      "vehicles": [
+        {
+          "box": [
+            310,
+            330,
+            410,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 93,
+      "vehicles": [
+        {
+          "box": [
+            315,
+            330,
+            415,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 94,
+      "vehicles": [
+        {
+          "box": [
+            320,
+            330,
+            420,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 95,
+      "vehicles": [
+        {
+          "box": [
+            325,
+            330,
+            425,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 96,
+      "vehicles": [
+        {
+          "box": [
+            330,
+            330,
+            430,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 97,
+      "vehicles": [
+        {
+          "box": [
+            335,
+            330,
+            435,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 98,
+      "vehicles": [
+        {
+          "box": [
+            340,
+            330,
+            440,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 99,
+      "vehicles": [
+        {
+          "box": [
+            345,
+            330,
+            445,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 100,
+      "vehicles": [
+        {
+          "box": [
+            350,
+            330,
+            450,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 101,
+      "vehicles": [
+        {
+          "box": [
+            355,
+            330,
+            455,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 102,
+      "vehicles": [
+        {
+          "box": [
+            360,
+            330,
+            460,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 103,
+      "vehicles": [
+        {
+          "box": [
+            365,
+            330,
+            465,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 104,
+      "vehicles": [
+        {
+          "box": [
+            370,
+            330,
+            470,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 105,
+      "vehicles": [
+        {
+          "box": [
+            375,
+            330,
+            475,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 106,
+      "vehicles": [
+        {
+          "box": [
+            380,
+            330,
+            480,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 107,
+      "vehicles": [
+        {
+          "box": [
+            385,
+            330,
+            485,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 108,
+      "vehicles": [
+        {
+          "box": [
+            390,
+            330,
+            490,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 109,
+      "vehicles": [
+        {
+          "box": [
+            395,
+            330,
+            495,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 110,
+      "vehicles": [
+        {
+          "box": [
+            400,
+            330,
+            500,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 111,
+      "vehicles": [
+        {
+          "box": [
+            405,
+            330,
+            505,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 112,
+      "vehicles": [
+        {
+          "box": [
+            410,
+            330,
+            510,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 113,
+      "vehicles": [
+        {
+          "box": [
+            415,
+            330,
+            515,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 114,
+      "vehicles": [
+        {
+          "box": [
+            420,
+            330,
+            520,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 115,
+      "vehicles": [
+        {
+          "box": [
+            425,
+            330,
+            525,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 116,
+      "vehicles": [
+        {
+          "box": [
+            430,
+            330,
+            530,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 117,
+      "vehicles": [
+        {
+          "box": [
+            435,
+            330,
+            535,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 118,
+      "vehicles": [
+        {
+          "box": [
+            440,
+            330,
+            540,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 119,
+      "vehicles": [
+        {
+          "box": [
+            445,
+            330,
+            545,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 120,
+      "vehicles": [
+        {
+          "box": [
+            450,
+            330,
+            550,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 121,
+      "vehicles": [
+        {
+          "box": [
+            455,
+            330,
+            555,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 122,
+      "vehicles": [
+        {
+          "box": [
+            460,
+            330,
+            560,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 123,
+      "vehicles": [
+        {
+          "box": [
+            465,
+            330,
+            565,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 124,
+      "vehicles": [
+        {
+          "box": [
+            470,
+            330,
+            570,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 125,
+      "vehicles": [
+        {
+          "box": [
+            475,
+            330,
+            575,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 126,
+      "vehicles": [
+        {
+          "box": [
+            480,
+            330,
+            580,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 127,
+      "vehicles": [
+        {
+          "box": [
+            485,
+            330,
+            585,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 128,
+      "vehicles": [
+        {
+          "box": [
+            490,
+            330,
+            590,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 129,
+      "vehicles": [
+        {
+          "box": [
+            495,
+            330,
+            595,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 130,
+      "vehicles": [
+        {
+          "box": [
+            500,
+            330,
+            600,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 131,
+      "vehicles": [
+        {
+          "box": [
+            505,
+            330,
+            605,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 132,
+      "vehicles": [
+        {
+          "box": [
+            510,
+            330,
+            610,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 133,
+      "vehicles": [
+        {
+          "box": [
+            515,
+            330,
+            615,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 134,
+      "vehicles": [
+        {
+          "box": [
+            520,
+            330,
+            620,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 135,
+      "vehicles": [
+        {
+          "box": [
+            525,
+            330,
+            625,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 136,
+      "vehicles": [
+        {
+          "box": [
+            530,
+            330,
+            630,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 137,
+      "vehicles": [
+        {
+          "box": [
+            535,
+            330,
+            635,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 138,
+      "vehicles": [
+        {
+          "box": [
+            540,
+            330,
+            640,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 139,
+      "vehicles": [
+        {
+          "box": [
+            545,
+            330,
+            645,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 140,
+      "vehicles": [
+        {
+          "box": [
+            550,
+            330,
+            650,
+            420
+          ],
+          "type": "car"
+        }
+      ],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 141,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 142,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 143,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 144,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 145,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 146,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 147,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 148,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    },
+    {
+      "frame": 149,
+      "vehicles": [],
+      "persons": [],
+      "dumping": false
+    }
+  ]
+}

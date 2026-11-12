@@ -1,0 +1,84 @@
+{
+  "timestamp_utc": "2026-11-12T16:50:21.193671+00:00",
+  "source": "tests/data/scenarios/gs03_person_deposits.mp4",
+  "weights": "models/weights/yolo11n.pt",
+  "plate_weights": null,
+  "tracker": "bytetrack.yaml",
+  "device": "cpu",
+  "polygon": [
+    {
+      "x": 0.1,
+      "y": 0.6
+    },
+    {
+      "x": 0.9,
+      "y": 0.6
+    },
+    {
+      "x": 0.9,
+      "y": 1.0
+    },
+    {
+      "x": 0.1,
+      "y": 1.0
+    }
+  ],
+  "ocr_languages": [
+    "en"
+  ],
+  "ocr_conf_threshold": 0.2,
+  "stop_threshold_secs": 2.0,
+  "frames_processed": 150,
+  "total_frames_available": 150,
+  "load_seconds": 0.048,
+  "wall_seconds": 10.785,
+  "effective_fps": 13.91,
+  "total_tracks": 2,
+  "incident_candidates": [],
+  "tracks": [
+    {
+      "track_id": 1,
+      "vehicle_type": "car",
+      "first_seen_frame": 14,
+      "last_frame": 62,
+      "max_confidence": 0.88,
+      "in_polygon_final": false,
+      "stop_events": [
+        {
+          "start_frame": 16,
+          "end_frame": 150,
+          "duration_secs": 5.36
+        }
+      ],
+      "total_stop_secs": 5.36,
+      "long_stop_count": 1,
+      "longest_stop_secs": 5.36,
+      "plate_consensus": null,
+      "plate_reads": [],
+      "dumping_cues": [],
+      "dumping_cue_count": 0
+    },
+    {
+      "track_id": 2,
+      "vehicle_type": "car",
+      "first_seen_frame": 101,
+      "last_frame": 149,
+      "max_confidence": 0.85,
+      "in_polygon_final": false,
+      "stop_events": [
+        {
+          "start_frame": 101,
+          "end_frame": 147,
+          "duration_secs": 1.84
+        }
+      ],
+      "total_stop_secs": 1.84,
+      "long_stop_count": 0,
+      "longest_stop_secs": 1.84,
+      "plate_consensus": null,
+      "plate_reads": [],
+      "dumping_cues": [],
+      "dumping_cue_count": 0
+    }
+  ]
+}

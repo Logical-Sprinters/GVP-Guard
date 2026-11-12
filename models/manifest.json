@@ -1,0 +1,12 @@
+{
+  "models/weights/yolo11n.pt": {
+    "sha256": "0ebbc80d4a7680d14987a577cd21342b65ecfd94632bd9a8da63ae6417644ee1",
+    "source": "https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo11n.pt",
+    "downloaded": "2026-11-07"
+  },
+  "models/weights/yolo11s.pt": {
+    "sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+    "source": "https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo11s.pt",
+    "downloaded": "2026-11-07"
+  }
+}

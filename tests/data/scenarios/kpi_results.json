@@ -1,0 +1,137 @@
+{
+  "timestamp_utc": "2026-11-12T16:52:35.558066+00:00",
+  "hardware": "CPU (sandbox)",
+  "footage_conditions": "Synthetic daytime, 640x480, 25fps",
+  "sample_size": 7,
+  "camera_hours": 1.75,
+  "confidence_level": 0.95,
+  "scenario_tests": {
+    "total": 7,
+    "passed": 2,
+    "failed": 5,
+    "pass_rate": 0.2857,
+    "pass_rate_ci": [
+      0.0822,
+      0.6411
+    ]
+  },
+  "detection_performance": {
+    "avg_effective_fps": 15.52
+  },
+  "plate_ocr": {
+    "total_incidents": 0,
+    "incidents_with_plate": 0,
+    "plate_read_rate": 0.0,
+    "plate_read_rate_ci": [
+      0.0,
+      0.0
+    ]
+  },
+  "evidence": {
+    "total_incidents": 0,
+    "incidents_with_evidence": 0,
+    "evidence_completeness": 0.0,
+    "evidence_completeness_ci": [
+      0.0,
+      0.0
+    ]
+  },
+  "false_alerts": {
+    "false_alert_count": 2,
+    "camera_hours": 1.75,
+    "false_alerts_per_camera_hour": 1.1429
+  },
+  "dumping_event": {
+    "true_positives": 0,
+    "total_predicted": 0,
+    "precision": 0.0,
+    "precision_ci": [
+      0.0,
+      0.0
+    ]
+  },
+  "alert_to_action": {
+    "samples": 0,
+    "avg_seconds": null
+  },
+  "scenario_details": [
+    {
+      "id": "GS-01",
+      "name": "01_Normal_Pass",
+      "passed": false,
+      "effective_fps": 14.06,
+      "max_stop_secs": 2.96,
+      "long_stops": 1,
+      "dumping_cue_frames": 0,
+      "total_tracks": 1
+    },
+    {
+      "id": "GS-02",
+      "name": "02_Long_Stop_No_Deposit",
+      "passed": true,
+      "effective_fps": 16.03,
+      "max_stop_secs": 5.44,
+      "long_stops": 1,
+      "dumping_cue_frames": 0,
+      "total_tracks": 1
+    },
+    {
+      "id": "GS-03",
+      "name": "03_Person_Deposits",
+      "passed": false,
+      "effective_fps": 15.29,
+      "max_stop_secs": 5.36,
+      "long_stops": 1,
+      "dumping_cue_frames": 0,
+      "total_tracks": 2
+    },
+    {
+      "id": "GS-04",
+      "name": "04_Waste_Present",
+      "passed": false,
+      "effective_fps": 15.55,
+      "max_stop_secs": 2.2,
+      "long_stops": 1,
+      "dumping_cue_frames": 0,
+      "total_tracks": 1
+    },
+    {
+      "id": "GS-05",
+      "name": "05_Plate_Unreadable",
+      "passed": false,
+      "effective_fps": 16.09,
+      "max_stop_secs": 5.56,
+      "long_stops": 1,
+      "dumping_cue_frames": 0,
+      "total_tracks": 2
+    },
+    {
+      "id": "GS-06",
+      "name": "06_Network_Fail",
+      "passed": false,
+      "effective_fps": 15.98,
+      "max_stop_secs": 5.36,
+      "long_stops": 1,
+      "dumping_cue_frames": 0,
+      "total_tracks": 2
+    },
+    {
+      "id": "GS-07",
+      "name": "07_Duplicate_Event",
+      "passed": true,
+      "effective_fps": 15.65,
+      "max_stop_secs": 2.88,
+      "long_stops": 1,
+      "dumping_cue_frames": 0,
+      "total_tracks": 2
+    }
+  ],
+  "honesty_notes": [
+    "All metrics are targets to measure, never published without documented tests.",
+    "Hardware, footage conditions, and sample size are recorded with every result.",
+    "Confidence intervals are Wilson score intervals at 95% confidence.",
+    "Human review mandatory \u2014 no automatic fines.",
+    "Stop time alone does NOT imply guilt.",
+    "No GMC/registry/e-challan integration."
+  ]
+}

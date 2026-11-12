@@ -1,0 +1,50 @@
+{
+  "timestamp_utc": "2026-11-12T16:49:00.200861+00:00",
+  "source": "tests/data/scenarios/gs04_waste_present.mp4",
+  "weights": "models/weights/yolo11n.pt",
+  "tracker": "bytetrack.yaml",
+  "device": "cpu",
+  "polygon": [
+    {
+      "x": 0.1,
+      "y": 0.6
+    },
+    {
+      "x": 0.9,
+      "y": 0.6
+    },
+    {
+      "x": 0.9,
+      "y": 1.0
+    },
+    {
+      "x": 0.1,
+      "y": 1.0
+    }
+  ],
+  "frames_processed": 150,
+  "total_frames_available": 150,
+  "load_seconds": 0.03,
+  "wall_seconds": 10.532,
+  "effective_fps": 14.24,
+  "total_tracks": 1,
+  "tracks": [
+    {
+      "track_id": 2,
+      "vehicle_type": "car",
+      "first_seen_frame": 14,
+      "last_frame": 76,
+      "max_confidence": 0.9,
+      "stop_events": [
+        {
+          "start_frame": 17,
+          "end_frame": 72,
+          "duration_secs": 2.2
+        }
+      ],
+      "total_stop_secs": 2.2,
+      "long_stop_count": 1,
+      "longest_stop_secs": 2.2
+    }
+  ]
+}

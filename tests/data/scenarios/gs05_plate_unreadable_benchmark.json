@@ -1,0 +1,22 @@
+{
+  "timestamp_utc": "2026-11-12T16:47:37.416490+00:00",
+  "source": "tests/data/scenarios/gs05_plate_unreadable.mp4",
+  "weights": "models/weights/yolo11n.pt",
+  "device": "cpu",
+  "conf_threshold": 0.25,
+  "imgsz": 640,
+  "frames_processed": 150,
+  "load_seconds": 0.035,
+  "wall_seconds": 11.269,
+  "effective_fps": 13.31,
+  "avg_inference_ms": 74.1,
+  "p95_inference_ms": 87.78,
+  "p99_inference_ms": 98.08,
+  "total_detections": 141,
+  "vehicle_detections": 66,
+  "detections_by_class": {
+    "car": 66,
+    "airplane": 75
+  },
+  "source_fps": 25.0
+}
