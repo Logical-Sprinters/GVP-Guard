@@ -20,7 +20,7 @@ Unauthorized evidence access, tampering, leaked stream credentials, insecure upl
 - Audit log of views and changes
 - Configurable retention/deletion jobs
 - Backup and restore tests
-- Stream credentials outside source code
+- Stream credentials outside source code (RTSP URLs stored in database, not in code; never logged or returned in API responses)
 
 ## Responsible AI controls
 - No automatic fines

@@ -13,19 +13,27 @@ audit logging for evidence access.
 """
 import base64
 import hashlib
+import json
 import time
 from collections import defaultdict
 from datetime import timedelta
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from . import auth, db
+from .rtsp_capture import (
+    get_camera_frame, list_active_cameras, start_camera, stop_camera,
+    stop_all_cameras,
+)
 from .schemas import (
+    CameraIn,
+    CameraOut,
+    CameraUpdate,
     ChecksumVerifyOut,
     CleanupRequestIn,
     CleanupRequestUpdate,
@@ -38,6 +46,9 @@ from .schemas import (
     Token,
     UserIn,
     UserOut,
+    ZoneIn,
+    ZoneOut,
+    ZoneUpdate,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -45,12 +56,342 @@ API = '/api/v1'
 
 app = FastAPI(
     title='GVP-Guard API',
-    version='0.3.0',
+    version='0.4.0',
     description='Draft incident/evidence API for the NightEye AI prototype. Human review required.',
 )
 
 db.init_db()
 app.mount('/assets', StaticFiles(directory=ROOT / 'assets'), name='assets')
+
+
+# ---------------------------------------------------------------------------
+# Real-time alerting (Server-Sent Events)
+# ---------------------------------------------------------------------------
+
+_alert_subscribers: dict[str, list] = {}  # camera_id -> list of asyncio queues
+_alert_lock = __import__('asyncio').Lock()
+
+
+async def _broadcast_alert(camera_id: str, alert: dict):
+    """Send an alert to all SSE subscribers for a camera."""
+    import asyncio
+    async with _alert_lock:
+        queues = _alert_subscribers.get(camera_id, [])
+        for q in queues:
+            try:
+                q.put_nowait(alert)
+            except Exception:
+                pass
+
+
+@app.get(API + '/alerts/stream')
+async def alert_stream(request: Request, camera_id: str | None = None):
+    """Server-Sent Events stream for real-time alerts.
+
+    Query params:
+      - camera_id: optional, subscribe to alerts for a specific camera
+    Returns text/event-stream with alert events.
+    """
+    import asyncio
+
+    async def event_generator():
+        queue: asyncio.Queue = asyncio.Queue()
+        subscriber_key = camera_id or '__global__'
+        async with _alert_lock:
+            _alert_subscribers.setdefault(subscriber_key, []).append(queue)
+        try:
+            # Send initial connection event
+            yield f"data: {json.dumps({'type': 'connected', 'camera_id': subscriber_key})}\n\n"
+            while True:
+                if await request.is_disconnected():
+                    break
+                try:
+                    alert = await asyncio.wait_for(queue.get(), timeout=30.0)
+                    yield f"data: {json.dumps(alert)}\n\n"
+                except asyncio.TimeoutError:
+                    yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
+        finally:
+            async with _alert_lock:
+                if subscriber_key in _alert_subscribers:
+                    try:
+                        _alert_subscribers[subscriber_key].remove(queue)
+                    except ValueError:
+                        pass
+
+    return StreamingResponse(
+        event_generator(),
+        media_type='text/event-stream',
+        headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'},
+    )
+
+
+# ---------------------------------------------------------------------------
+# Camera management endpoints
+# ---------------------------------------------------------------------------
+
+@app.post(API + '/cameras', response_model=CameraOut, status_code=201)
+def create_camera_endpoint(
+    request: Request,
+    camera: CameraIn,
+    current_user: auth.TokenData = Depends(auth.require_role(["admin", "officer"])),
+):
+    """Register a new camera. Requires officer+ role."""
+    _check_rate_limit(request, 'evidence_write')
+    created = db.create_camera(
+        camera_id=camera.id,
+        name=camera.name,
+        location_text=camera.location_text,
+        lat=camera.lat,
+        lon=camera.lon,
+        stream_ref=camera.stream_ref,
+    )
+    if created is None:
+        raise HTTPException(status_code=400, detail='Camera ID already exists')
+    # If RTSP stream provided, attempt to start capturing
+    if camera.stream_ref:
+        start_camera(camera.id, camera.stream_ref)
+    return CameraOut(**created)
+
+
+@app.get(API + '/cameras', response_model=list[CameraOut])
+def list_cameras_endpoint():
+    """List all cameras with current status."""
+    cameras = db.list_cameras()
+    # Merge live status from RTSP capture registry
+    active = {c['camera_id']: c for c in list_active_cameras()}
+    result = []
+    for cam in cameras:
+        cam_dict = dict(cam)
+        if cam['id'] in active:
+            cam_dict['status'] = 'online' if active[cam['id']]['connected'] else 'error'
+            cam_dict['fps'] = active[cam['id']]['fps']
+            cam_dict['error'] = active[cam['id']]['error']
+        result.append(CameraOut(**cam_dict))
+    return result
+
+
+@app.get(API + '/cameras/{camera_id}', response_model=CameraOut)
+def get_camera_endpoint(camera_id: str):
+    """Get a single camera by ID."""
+    cam = db.get_camera(camera_id)
+    if cam is None:
+        raise HTTPException(status_code=404, detail='Camera not found')
+    return CameraOut(**cam)
+
+
+@app.patch(API + '/cameras/{camera_id}', response_model=CameraOut)
+def update_camera_endpoint(
+    request: Request,
+    camera_id: str,
+    changes: CameraUpdate,
+    current_user: auth.TokenData = Depends(auth.require_role(["admin", "officer"])),
+):
+    """Update camera metadata. Requires officer+ role."""
+    _check_rate_limit(request, 'evidence_write')
+    cam = db.get_camera(camera_id)
+    if cam is None:
+        raise HTTPException(status_code=404, detail='Camera not found')
+    update_data = changes.model_dump(exclude_unset=True)
+    # Handle stream_ref changes: restart capture if stream changed
+    if 'stream_ref' in update_data and update_data['stream_ref'] != cam.get('stream_ref'):
+        stop_camera(camera_id)
+        if update_data['stream_ref']:
+            start_camera(camera_id, update_data['stream_ref'])
+    updated = db.update_camera(camera_id, update_data)
+    if updated is None:
+        raise HTTPException(status_code=404, detail='Camera not found')
+    return CameraOut(**updated)
+
+
+@app.delete(API + '/cameras/{camera_id}', status_code=204)
+def delete_camera_endpoint(
+    request: Request,
+    camera_id: str,
+    current_user: auth.TokenData = Depends(auth.require_role(["admin"])),
+):
+    """Delete a camera. Requires admin role."""
+    _check_rate_limit(request, 'evidence_write')
+    stop_camera(camera_id)
+    if not db.delete_camera(camera_id):
+        raise HTTPException(status_code=404, detail='Camera not found')
+    return Response(status_code=204)
+
+
+# ---------------------------------------------------------------------------
+# RTSP frame / stream endpoints
+# ---------------------------------------------------------------------------
+
+@app.get(API + '/cameras/{camera_id}/frame')
+def get_camera_frame_endpoint(camera_id: str, current_user: auth.TokenData = Depends(auth.require_auth)):
+    """Get the latest JPEG frame from an RTSP camera."""
+    result = get_camera_frame(camera_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail='Camera not streaming or no frame available')
+    ts, jpeg = result
+    return Response(content=jpeg, media_type='image/jpeg',
+                    headers={'Cache-Control': 'no-cache, no-store, must-revalidate'})
+
+
+@app.get(API + '/cameras/{camera_id}/stream')
+def get_camera_stream_endpoint(camera_id: str, current_user: auth.TokenData = Depends(auth.require_auth)):
+    """MJPEG stream of an RTSP camera feed.
+
+    Returns multipart/x-mixed-replace JPEG stream for same-origin consumption.
+    No CORS, no direct RTSP from the client.
+    """
+    cam = None
+    from .rtsp_capture import get_camera_instance
+    cam = get_camera_instance(camera_id)
+    if cam is None:
+        # Try to auto-start if camera exists in DB with stream_ref
+        db_cam = db.get_camera(camera_id)
+        if db_cam and db_cam.get('stream_ref'):
+            start_camera(camera_id, db_cam['stream_ref'])
+            cam = get_camera_instance(camera_id)
+        if cam is None:
+            raise HTTPException(status_code=404, detail='Camera not found or not streaming')
+
+    def mjpeg_generator():
+        boundary = b'--frameboundary'
+        while True:
+            result = cam.get_latest_frame()
+            if result:
+                ts, jpeg = result
+                yield (boundary + b'\r\n'
+                       b'Content-Type: image/jpeg\r\n'
+                       b'Content-Length: ' + str(len(jpeg)).encode() + b'\r\n'
+                       b'\r\n' + jpeg + b'\r\n')
+            time.sleep(0.1)  # ~10 FPS cap
+
+    return StreamingResponse(
+        mjpeg_generator(),
+        media_type='multipart/x-mixed-replace; boundary=frameboundary',
+        headers={'Cache-Control': 'no-cache, no-store, must-revalidate'},
+    )
+
+
+# ---------------------------------------------------------------------------
+# GVP Zone endpoints
+# ---------------------------------------------------------------------------
+
+@app.post(API + '/cameras/{camera_id}/zones', response_model=ZoneOut, status_code=201)
+def create_zone_endpoint(
+    request: Request,
+    camera_id: str,
+    zone: ZoneIn,
+    current_user: auth.TokenData = Depends(auth.require_role(["admin", "officer"])),
+):
+    """Create a GVP zone for a camera. Requires officer+ role."""
+    _check_rate_limit(request, 'evidence_write')
+    if zone.camera_id != camera_id:
+        raise HTTPException(status_code=400, detail='Zone camera_id does not match path')
+    if db.get_camera(camera_id) is None:
+        raise HTTPException(status_code=404, detail='Camera not found')
+    created = db.create_zone(
+        zone_id=zone.id,
+        camera_id=zone.camera_id,
+        name=zone.name,
+        polygon_json=zone.polygon_json,
+        stop_threshold_seconds=zone.stop_threshold_seconds,
+    )
+    if created is None:
+        raise HTTPException(status_code=400, detail='Zone ID already exists')
+    return ZoneOut(**created)
+
+
+@app.get(API + '/cameras/{camera_id}/zones', response_model=list[ZoneOut])
+def list_zones_endpoint(camera_id: str):
+    """List all GVP zones for a camera."""
+    zones = db.list_zones(camera_id)
+    return [ZoneOut(**z) for z in zones]
+
+
+@app.get(API + '/zones/{zone_id}', response_model=ZoneOut)
+def get_zone_endpoint(zone_id: str):
+    """Get a single zone by ID."""
+    zone = db.get_zone(zone_id)
+    if zone is None:
+        raise HTTPException(status_code=404, detail='Zone not found')
+    return ZoneOut(**zone)
+
+
+@app.patch(API + '/zones/{zone_id}', response_model=ZoneOut)
+def update_zone_endpoint(
+    request: Request,
+    zone_id: str,
+    changes: ZoneUpdate,
+    current_user: auth.TokenData = Depends(auth.require_role(["admin", "officer"])),
+):
+    """Update a zone. Requires officer+ role."""
+    _check_rate_limit(request, 'evidence_write')
+    updated = db.update_zone(zone_id, changes.model_dump(exclude_unset=True))
+    if updated is None:
+        raise HTTPException(status_code=404, detail='Zone not found')
+    return ZoneOut(**updated)
+
+
+@app.delete(API + '/zones/{zone_id}', status_code=204)
+def delete_zone_endpoint(
+    request: Request,
+    zone_id: str,
+    current_user: auth.TokenData = Depends(auth.require_role(["admin"])),
+):
+    """Delete a zone. Requires admin role."""
+    _check_rate_limit(request, 'evidence_write')
+    if not db.delete_zone(zone_id):
+        raise HTTPException(status_code=404, detail='Zone not found')
+    return Response(status_code=204)
+
+
+# ---------------------------------------------------------------------------
+# Camera health / status
+# ---------------------------------------------------------------------------
+
+@app.get(API + '/cameras/{camera_id}/health')
+def get_camera_health(camera_id: str):
+    """Get camera health status."""
+    cam = db.get_camera(camera_id)
+    if cam is None:
+        raise HTTPException(status_code=404, detail='Camera not found')
+    active = list_active_cameras()
+    live = next((c for c in active if c['camera_id'] == camera_id), None)
+    health = {
+        'camera_id': camera_id,
+        'db_status': cam['status'],
+        'streaming': live is not None and live['connected'],
+        'fps': live['fps'] if live else 0.0,
+        'error': live['error'] if live else None,
+    }
+    return health
+
+
+@app.post(API + '/cameras/{camera_id}/start', status_code=204)
+def start_camera_endpoint(
+    request: Request,
+    camera_id: str,
+    current_user: auth.TokenData = Depends(auth.require_role(["admin", "officer"])),
+):
+    """Start RTSP capture for a camera."""
+    _check_rate_limit(request, 'evidence_write')
+    cam = db.get_camera(camera_id)
+    if cam is None:
+        raise HTTPException(status_code=404, detail='Camera not found')
+    if not cam.get('stream_ref'):
+        raise HTTPException(status_code=400, detail='Camera has no stream_ref')
+    start_camera(camera_id, cam['stream_ref'])
+    return Response(status_code=204)
+
+
+@app.post(API + '/cameras/{camera_id}/stop', status_code=204)
+def stop_camera_endpoint(
+    request: Request,
+    camera_id: str,
+    current_user: auth.TokenData = Depends(auth.require_role(["admin", "officer"])),
+):
+    """Stop RTSP capture for a camera."""
+    _check_rate_limit(request, 'evidence_write')
+    stop_camera(camera_id)
+    return Response(status_code=204)
 
 
 # ---------------------------------------------------------------------------

@@ -1,6 +1,28 @@
 # Changelog
 
-## [0.6.0] — Platform Hardening: Evidence Storage, Security & Rate Limiting (2026-11-06)
+## [0.7.0] — RTSP/CCTV Camera Support & Real-Time Alerting (2026-11-06)
+
+### Added
+- `backend/rtsp_capture.py`: RTSP capture service — OpenCV VideoCapture daemon with auto-reconnect and exponential backoff; per-camera frame buffer; MJPEG frame encoding; FPS tracking
+- `backend/app.py`: camera CRUD (`POST/GET/PATCH/DELETE /cameras`), zone CRUD (`POST/GET/PATCH/DELETE /zones`), RTSP frame (`GET /cameras/{id}/frame`), MJPEG stream (`GET /cameras/{id}/stream`), camera health (`GET /cameras/{id}/health`), start/stop control (`POST /cameras/{id}/start|stop`), SSE alerting (`GET /alerts/stream`)
+- `backend/schemas.py`: `CameraIn`, `CameraOut`, `CameraUpdate`, `ZoneIn`, `ZoneOut`, `ZoneUpdate` schemas
+- `backend/db.py`: `cameras` and `gvp_zones` tables; camera and zone CRUD functions
+- `backend/requirements.txt`: added `opencv-python-headless>=4.8`
+- `assets/js/camera.js`: `useRTSP()` method — connects to same-origin MJPEG proxy; `grabFrame()` works with MJPEG `` source; RTSP mode toggles video/img display
+- `assets/js/app.js`: RTSP camera source button and camera ID input; SSE alert stream connection; camera health fetch on connect
+- `index.html`: RTSP camera button + camera ID input field; MJPEG `` element for RTSP feed
+- `docs/02_SYSTEM_ARCHITECTURE.md`, `docs/06_API_SPEC.md`, `docs/07_DATABASE_SCHEMA.md`, `docs/08_SECURITY_PRIVACY.md`, `docs/15_IMPLEMENTATION_STATUS.md`: updated for RTSP/CCTV, zones, SSE alerting
+
+### Changed
+- `backend/app.py`: version 0.4.0; added 16 new API routes
+- `package.json`/`package-lock.json`: version 0.7.0
+
+### Honesty notes
+- RTSP feed is scene-stability heuristic only — NOT vehicle detection, tracking, stop timer, or dumping model
+- Stream credentials stored in database, never in source code; never logged or returned in API responses
+- SSE alerting is non-fatal — connection issues don't break monitoring
+- All Step 4 features remain DEMO STAGE — stop time alone does NOT imply guilt
+- Human review mandatory — no automatic fines or guilt
 
 ### Added
 - `backend/db.py`: `evidence_items` and `evidence_access_log` tables; `store_evidence()`, `get_evidence_item()`, `read_evidence_file()`, `list_evidence_for_incident()`, `log_evidence_access()`, `verify_checksum()`, `generate_signed_url()`, `verify_signed_url()`, `get_evidence_access_log()`, `delete_expired_evidence()`; `EVIDENCE_DIR` object storage under `data/evidence/`

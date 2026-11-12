@@ -3,11 +3,21 @@
 Base path: `/api/v1`
 
 ## Cameras and zones
-- `GET /cameras`
-- `POST /cameras`
-- `GET /cameras/{id}/zones`
-- `POST /cameras/{id}/zones`
-- `PATCH /zones/{id}`
+- `GET /cameras` — list all cameras with live status
+- `POST /cameras` — register a new camera (officer+)
+- `GET /cameras/{id}` — get a camera
+- `PATCH /cameras/{id}` — update camera metadata (officer+)
+- `DELETE /cameras/{id}` — delete a camera (admin)
+- `POST /cameras/{id}/start` — start RTSP capture (officer+)
+- `POST /cameras/{id}/stop` — stop RTSP capture (officer+)
+- `GET /cameras/{id}/health` — camera health status
+- `GET /cameras/{id}/frame` — latest JPEG frame (auth required)
+- `GET /cameras/{id}/stream` — MJPEG stream (auth required)
+- `GET /cameras/{id}/zones` — list zones for a camera
+- `POST /cameras/{id}/zones` — create a zone (officer+)
+- `GET /zones/{id}` — get a zone
+- `PATCH /zones/{id}` — update a zone (officer+)
+- `DELETE /zones/{id}` — delete a zone (admin)
 
 ## Video/events
 - `POST /analysis/jobs` — upload/reference video and zone
@@ -23,6 +33,9 @@ Base path: `/api/v1`
 - `POST /incidents/{id}/cleanup-request`
 - `GET /incidents/{id}/audit`
 - `GET /incidents/{id}/export`
+
+## Real-time alerting
+- `GET /alerts/stream?camera_id=<id>` — Server-Sent Events stream for scene-stability alerts (auth required)
 
 ## Evidence (object storage)
 - `POST /incidents/{id}/evidence` — upload a frame (base64 body); returns storage_key + signed URL
@@ -56,6 +69,7 @@ Use UUIDs, ISO-8601 UTC timestamps, pagination, role checks, validation, idempot
 
 - Implemented: `GET /health`; `GET`, `POST`, `DELETE /incidents`; `GET`, `PATCH /incidents/{id}`; `POST /incidents/{id}/decision`; `POST /incidents/{id}/cleanup-request`; `GET /incidents/{id}/cleanup-request`; `GET /cleanup-requests`; `PATCH /cleanup-requests/{id}`; `GET /incidents/{id}/evidence`; `GET /evidence/{incident_id}/{frame}`; `GET /incidents/{id}/audit`; `GET /incidents/{id}/export`; `GET /gvps`; `GET /analytics/summary`.
 - Implemented: evidence object storage (`POST/GET /incidents/{id}/evidence`, `GET /evidence/{storage_key}`, `GET /evidence/{storage_key}/download`, `GET /evidence/{storage_key}/checksum`, `GET /evidence/{storage_key}/access-log`), signed time-limited URLs, SHA-256 checksums, chain-of-custody access log, rate limiting, security headers.
-- Still draft: cameras/zones, analysis jobs, events, pagination, idempotency keys and consistent error envelopes.
+- Implemented: cameras/zones (`GET/POST/PATCH/DELETE /cameras`, `GET/POST/PATCH/DELETE /zones`, `GET /cameras/{id}/health`, `GET /cameras/{id}/frame`, `GET /cameras/{id}/stream`, `POST /cameras/{id}/start|stop`), RTSP capture via OpenCV backend daemon, MJPEG streaming, SSE alerting (`GET /alerts/stream`), rate limiting, security headers.
+- Still draft: analysis jobs, events, pagination, idempotency keys and consistent error envelopes.
 
 See [`../backend/README.md`](../backend/README.md) for run instructions.
