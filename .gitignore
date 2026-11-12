@@ -46,3 +46,7 @@ backend/data/
 
 # Model weights (external dependency — not committed)
 models/weights/
+
+# Real datasets (external dependency — not committed per claim discipline)
+tests/data/real_datasets/*.jpg
+tests/data/real_datasets/annotations_coco.json

@@ -83,9 +83,11 @@ package.json                   # dev-only test tooling (the app has no runtime d
 **Benchmarking complete (2026-11-07):**
 - Model weights downloaded and verified: `yolo11n.pt` (SHA-256 `0ebbc80d...`), `yolo11s.pt` (SHA-256 `85a76fe8...`); hashes in `models/manifest.json` (weights NOT committed)
 - Synthetic test footage generated for 7 golden scenarios (GS-01 to GS-07) at `tests/data/scenarios/`
-- Benchmark results: 2/7 scenarios pass (28.6%) — vehicle detection + tracking work; person detection + plate OCR not validated
+- Real Indian license plate dataset downloaded from witvix/indian-truck-license-plates-sample (Hugging Face): 16 sampled images, 17 plate annotations, ground truth from COCO annotations
+- Benchmark results: 2/7 synthetic scenarios pass (28.6%) — vehicle detection + tracking work; person detection + plate OCR not validated on synthetic footage
+- Real plate OCR calibration: 0.0% exact match (0/17), 18.2% character accuracy (30/165 chars) on real Indian plates — EasyOCR on raw crops without dedicated plate detector
 - KPI metrics: pass rate 28.6% (CI: 0.08–0.64), false alerts 1.14/camera-hour, FPS 11–16, latency 74–110 ms
-- Test records stored: `tests/data/scenarios/test_records.json` (commit a8bbbbf, model yolo11n, dataset synthetic-v1)
+- Test records stored: `tests/data/scenarios/test_records.json` (commit a8bbbbf, synthetic-v1) and `tests/data/real_datasets/test_records_real.json` (commit f411c02, real plate dataset)
 
 **Go / no-go:** Step 4 implementation complete and benchmarked. All features remain DEMO STAGE until validated on held-out real footage with annotated persons and plates. Controlled dataset from a permitted GVP site still required (see `docs/STEP4_READINESS_PLAN.md`).
 
