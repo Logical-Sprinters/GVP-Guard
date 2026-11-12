@@ -30,7 +30,9 @@ from . import db
 from .schemas import ROLES, Token, TokenData, UserIn, UserOut
 
 # In production, load SECRET_KEY from environment variable
-SECRET_KEY = Path(__file__).resolve().parent.parent.joinpath(".secret_key").read_text().strip() if Path(__file__).resolve().parent.parent.joinpath(".secret_key").exists() else "gvp-guard-dev-secret-change-in-production"
+import os
+
+SECRET_KEY = os.environ.get("GVP_SECRET_KEY") or (Path(__file__).resolve().parent.parent.joinpath(".secret_key").read_text().strip() if Path(__file__).resolve().parent.parent.joinpath(".secret_key").exists() else "gvp-guard-dev-secret-change-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 

@@ -18,7 +18,7 @@ assets/js/
   storage.js                   # localStorage / optional API dual-mode persistence
   app.js                       # orchestration and DOM wiring
 backend/
-  app.py                       # FastAPI: static files + /api/v1 on one origin
+  app.py                       # FastAPI: static files + /api/v1 on one origin; monitoring (logging, metrics, health)
   auth.py                      # JWT auth, password hashing, role-based deps
   db.py                        # SQLite: incidents, decisions, audit_events, users, sessions, cameras, gvp_zones, evidence_items, evidence_access_log
   rtsp_capture.py              # RTSP capture service (OpenCV VideoCapture daemon, MJPEG frames)

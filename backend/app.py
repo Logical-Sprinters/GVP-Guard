@@ -14,10 +14,38 @@ audit logging for evidence access.
 import base64
 import hashlib
 import json
+import logging
+import os
+import sys
 import time
 from collections import defaultdict
 from datetime import timedelta
 from pathlib import Path
+
+# Prometheus-compatible metrics
+_REQUEST_COUNT = defaultdict(int)
+_REQUEST_LATENCY = defaultdict(list)
+_INCIDENT_COUNT = {'total': 0}
+
+# Configure structured JSON logging
+class JsonFormatter(logging.Formatter):
+    def format(self, record):
+        log_entry = {
+            'timestamp': self.formatTime(record, datefmt='%Y-%m-%dT%H:%M:%S'),
+            'level': record.levelname,
+            'logger': record.name,
+            'message': record.getMessage(),
+        }
+        if record.exc_info:
+            log_entry['exception'] = self.formatException(record.exc_info)
+        return json.dumps(log_entry)
+
+_handler = logging.StreamHandler(sys.stdout)
+_handler.setFormatter(JsonFormatter())
+_logger = logging.getLogger('gvp-guard')
+_logger.setLevel(logging.INFO)
+_logger.addHandler(_handler)
+logger = logging.getLogger('gvp-guard')
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
@@ -458,6 +486,39 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(SecurityHeadersMiddleware)
 
+
+# ---------------------------------------------------------------------------
+# Request logging middleware (structured logs + metrics)
+# ---------------------------------------------------------------------------
+
+@app.middleware("http")
+async def request_logging_middleware(request: Request, call_next):
+    start = time.time()
+    response = await call_next(request)
+    duration = time.time() - start
+
+    path = request.url.path
+    method = request.method
+    status = response.status_code
+
+    _REQUEST_COUNT[(method, path, status)] += 1
+    _REQUEST_LATENCY[(method, path)].append(duration)
+    if len(_REQUEST_LATENCY[(method, path)]) > 1000:
+        _REQUEST_LATENCY[(method, path)] = _REQUEST_LATENCY[(method, path)][-1000:]
+
+    logger.info(
+        "request",
+        extra={
+            'method': method,
+            'path': path,
+            'status': status,
+            'duration_ms': round(duration * 1000, 2),
+            'client': request.client.host if request.client else 'unknown',
+        },
+    )
+    return response
+
+
 # ---------------------------------------------------------------------------
 # Authentication endpoints
 # ---------------------------------------------------------------------------
@@ -775,7 +836,61 @@ def favicon():
 
 @app.get(API + '/health')
 def health():
-    return {'ok': True, 'service': 'gvp-guard', 'version': '0.3.0', 'storage': 'sqlite+object-storage'}
+    from . import rtsp_capture
+    active = rtsp_capture.list_active_cameras()
+    cameras_online = sum(1 for c in active if c['connected'])
+    cameras_total = len(active)
+
+    return {
+        'ok': True,
+        'service': 'gvp-guard',
+        'version': '0.4.0',
+        'storage': 'sqlite+object-storage',
+        'dependencies': {
+            'database': 'ok',
+            'evidence_storage': 'ok',
+        },
+        'cameras': {
+            'total': cameras_total,
+            'online': cameras_online,
+        },
+    }
+
+
+@app.get(API + '/metrics')
+def metrics():
+    lines = []
+
+    for (method, path, status), count in sorted(_REQUEST_COUNT.items()):
+        lines.append(f'http_requests_total{{method="{method}",path="{path}",status="{status}"}} {count}')
+
+    for (method, path), latencies in sorted(_REQUEST_LATENCY.items()):
+        if latencies:
+            avg = sum(latencies) / len(latencies)
+            lines.append(f'http_request_duration_seconds_avg{{method="{method}",path="{path}"}} {avg:.6f}')
+
+    try:
+        incidents = db.list_incidents()
+        _INCIDENT_COUNT['total'] = len(incidents)
+    except Exception:
+        _INCIDENT_COUNT['total'] = 0
+
+    lines.append(f'gvp_incidents_total {_INCIDENT_COUNT["total"]}')
+
+    try:
+        from . import rtsp_capture
+        active = rtsp_capture.list_active_cameras()
+        for cam in active:
+            cid = cam['camera_id']
+            connected = 1 if cam['connected'] else 0
+            fps = cam['fps']
+            lines.append(f'gvp_camera_connected{{camera_id="{cid}"}} {connected}')
+            lines.append(f'gvp_camera_fps{{camera_id="{cid}"}} {fps}')
+    except Exception:
+        pass
+
+    return Response(content=chr(10).join(lines) + chr(10), media_type='text/plain')
+'.join(lines) + '
 
 
 @app.get(API + '/incidents')
