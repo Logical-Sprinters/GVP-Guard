@@ -1,21 +1,21 @@
 # GVP-Guard — NightEye AI
 
-**GVP-Guard turns suspected night-time illegal-dumping events into review-ready incident records — evidence frames, time/location context and a plate candidate when available — so an authorized municipal officer can decide what happens next.**
+**GVP-Guard turns suspected illegal-dumping events into review-ready incident records — evidence frames, time/location context and a plate candidate when available — so an authorized municipal officer can decide what happens next.**
 
-A human-reviewed illegal-dumping incident and evidence platform for the chronic Garbage Vulnerable Points (GVPs) created by night dumping in Gandhidham, Gujarat.
+A human-reviewed illegal-dumping incident and evidence platform for chronic Garbage Vulnerable Points (GVPs) created by night dumping in Gandhidham, Gujarat.
 
 ## Project identity
 
 | | |
 |---|---|
 | **Repository** | <https://github.com/Logical-Sprinters/GVP-Guard> — development base: `master` |
-| **Problem statement** | `PS000048` (night-time illegal dumping / GVPs, Gandhidham) |
+| **Problem statement** | `PS000048` (illegal dumping / GVPs, Gandhidham) |
 | **Team** | `TM004162` — 8 members in 4 roles × 2 (see [Team at a glance](#team-at-a-glance)) |
 | **Institution** | P. P. Savani University, Surat, Gujarat |
 | **Challenge** | Seva First Innovation Challenge 2026 — Education Dept, Govt. of Gujarat / SSIP 2.0 |
 | **Track** | College |
-| **Current maturity** | MVP-1 technical proof (browser-based, human-reviewed) |
-| **Field status** | **Not validated in Gandhidham.** No measured accuracy, false-alert or impact figures exist or may be quoted. |
+| **Current maturity** | MVP-1 technical proof + MVP-2 pilot tooling + platform hardening (auth, RTSP, Docker, monitoring) |
+| **Field status** | **Not validated in Gandhidham.** No measured accuracy, false-alert or impact figures exist or may be quoted. GMC-approved footage required for pilot. |
 
 ## Core rule (non-negotiable)
 
@@ -24,15 +24,29 @@ A human-reviewed illegal-dumping incident and evidence platform for the chronic 
 
 ## How the prototype works
 
-Recorded clip or live webcam → GVP polygon → zone-limited analysis → rolling evidence buffer → incident record → officer decision:
+Recorded clip or live webcam / RTSP camera → GVP polygon → zone-limited analysis → rolling evidence buffer → incident record → officer decision:
 
-1. **Input** — upload a recorded video file or start the live webcam (`assets/js/camera.js`).
+1. **Input** — upload a recorded video file, start the live webcam, or connect an RTSP/CCTV camera (`assets/js/camera.js`).
 2. **Zone** — draw and edit a normalised GVP polygon over the vulnerable point (`assets/js/zone.js`).
 3. **Analysis** — zone-limited pixel differencing plus a live scene-stability monitor flag suspected events. The monitor is **explicitly a heuristic — not vehicle detection or tracking, not a vehicle stop timer, not a dumping model** (`assets/js/core.js`, `assets/js/monitor.js`).
-4. **Evidence** — a rolling 30-frame buffer produces before/during/after JPEG frames with real pixel data embedded in the JSON export (`assets/js/evidence.js`).
+4. **Evidence** — a rolling 30-frame buffer produces before/during/after JPEG frames. Evidence frames are stored in object storage with SHA-256 checksums, signed time-limited URLs, and a chain-of-custody access log (`assets/js/evidence.js`, `backend/db.py`, `backend/rtsp_capture.py`).
 5. **Incident record** — canonical status code, trigger reasons, reviewer and comment fields, and an editable plate candidate (demo stage — no OCR/ANPR exists yet).
-6. **Officer decision** — approve / reject / request cleanup; every decision writes an audit row.
-7. **Review surfaces** — local history, GVP map with a transparent priority score, JSON export, and optional server-side persistence.
+6. **Officer decision** — approve / reject / request cleanup; every decision writes an audit row. Requires authentication (officer+ role).
+7. **Review surfaces** — local history, GVP map with a transparent priority score, JSON export, and optional server-side persistence via FastAPI + SQLite.
+
+## Authentication & roles
+
+| Role | Can view | Can write (create/decide/cleanup) | Can manage users |
+|------|----------|-----------------------------------|------------------|
+| Viewer | All read-only views | No | No |
+| Officer | All read-only views | Yes | No |
+| Admin | All views | Yes | Yes |
+
+Write operations require sign-in; read operations work offline via `localStorage`. JWT bearer tokens secure all API write operations.
+
+## RTSP/CCTV camera support
+
+Connect to GMC-approved CCTV streams via Camera ID. The backend runs an OpenCV VideoCapture daemon with auto-reconnect and serves frames as same-origin MJPEG — the browser never calls RTSP directly. Real-time scene-stability alerts are pushed via Server-Sent Events (`GET /alerts/stream`).
 
 ## Status at a glance
 
@@ -41,8 +55,9 @@ The same labels are used everywhere (docs, deck, demo, judge answers). Full matr
 | Status | Capabilities |
 |--------|--------------|
 | **WORKING** (MVP-1 technical proof) | Recorded video **and** live webcam input; editable GVP polygon; zone-limited pixel comparison; rolling evidence buffer with real JPEG frames; live scene-stability monitor (heuristic); before/during/after evidence; incident records with canonical status codes, reviewer and comment; approve/reject/cleanup with audit rows; local history; GVP map with transparent priority score; JSON export with real frame data; optional FastAPI + SQLite persistence over relative `/api/v1` URLs |
+| **WORKING** (platform hardening, v0.9.0) | Authentication & roles (JWT, bcrypt); evidence object storage (SHA-256 checksums, signed URLs, chain-of-custody log); rate limiting (sliding window per IP); security headers (CSP, nosniff, X-Frame-Options DENY); RTSP/CCTV capture (OpenCV daemon, MJPEG, SSE alerts); Docker containerization (multi-stage, non-root); CI/CD pipeline (GitHub Actions); production monitoring (structured JSON logging, Prometheus metrics, health endpoint) |
 | **DEMO STAGE** (labelled heuristics / placeholders) | CSS tracking overlay; editable plate candidate; illustrative cue score and fixed 8% zone-diff threshold — **uncalibrated heuristics** |
-| **PLANNED** | Real vehicle detection/tracking (YOLO + ByteTrack), vehicle stop timer, multi-cue dumping-event model, plate detection and multi-frame night ANPR/OCR, RTSP/CCTV input, auth/roles, object storage, signed URLs, retention, observability — **step 4 (detection/ANPR) is deferred** pending model weights, a controlled dataset and benchmarking |
+| **PLANNED** | Real vehicle detection/tracking (YOLO + ByteTrack), vehicle stop timer, multi-cue dumping-event model, plate detection and multi-frame night ANPR/OCR — **step 4 (detection/ANPR) is deferred** pending model weights, a controlled dataset and benchmarking |
 | **EXTERNAL DEPENDENCY** | GMC-approved footage and camera access; field pilot; vehicle-registry / e-challan integration; citywide deployment |
 | **OUT OF SCOPE** | Automatic guilt or fines; guaranteed offender identification; legally-admissible-evidence claims; face recognition; predictive policing |
 
@@ -58,7 +73,25 @@ python3 -m http.server 8000 --bind 0.0.0.0
 
 The app detects the missing API and persists everything in `localStorage`.
 
-**Mode 2 — full app + API on one origin:**
+**Mode 2 — Docker (recommended for deployment):**
+
+```bash
+# Build and start
+docker compose up -d --build
+
+# Open the application
+open http://localhost:8000
+
+# View logs
+docker compose logs -f gvp-guard
+
+# Stop
+docker compose down
+```
+
+Set `GVP_SECRET_KEY` for production signing of JWT tokens and evidence URLs.
+
+**Mode 3 — full app + API on one origin (manual):**
 
 ```bash
 python3 -m pip install -r backend/requirements.txt
@@ -67,35 +100,74 @@ python3 -m uvicorn backend.app:app --host 0.0.0.0 --port 8000
 
 Open `http://localhost:8000/`. The header badge changes to "API persistence (SQLite)". One server serves both the static app and `/api/v1`, and browser code only ever calls **relative** URLs — so there is no CORS configuration and no `localhost` call from the client. Endpoint reference: [backend/README.md](backend/README.md).
 
+**Monitoring endpoints:**
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /api/v1/health` | Service health, dependency status, camera count |
+| `GET /api/v1/metrics` | Prometheus-compatible metrics (request counts, latency, incidents, camera FPS) |
+
 To exercise the workflow: use a controlled, permitted 20–30 second clip (or the webcam), edit the GVP zone, then run an analysis or live monitoring, review the evidence, and record an officer decision.
+
+## MVP-2 pilot tooling
+
+All tooling is built but requires **GMC-approved annotated footage** to execute:
+
+| Deliverable | File | Status |
+|-------------|------|--------|
+| Seven golden scenarios (GS-01 to GS-07) | `tools/video_test_harness.py` + `tools/golden_scenarios_template.json` | Built — needs annotated footage |
+| KPI measurement harness (Wilson score CIs) | `tools/kpi_harness.py` | Built — needs test data |
+| Test record storage (append-only log) | `tools/test_record_storage.py` | Built |
+| GMC permission workflow | `docs/GMC_PERMISSION_WORKFLOW.md` | Complete |
+| Officer training materials | `docs/OFFICER_TRAINING_MATERIALS.md` | Complete |
+
+No accuracy figures are published — all metrics require documented calibration tests on held-out footage.
 
 ## Tests
 
 ```bash
-npm install && npm test                      # 14 JS tests: 11 pure-logic + 3 jsdom UI/API-mode
-python3 -m unittest backend.test_db -v       # 5 SQLite tests
+npm install && npm test                      # JS tests: pure-logic + jsdom UI/API-mode
+python3 -m unittest backend.test_db -v       # SQLite tests
 ```
 
-> **Node version note:** the JS suite is verified on **Node.js 22+** (14/14). `jsdom@31` pulls in `undici`, whose zstd interceptor calls `zlib.createZstdDecompress` (added in Node 22); on Node 20 the 11 pure-logic tests still pass but `tests/ui.test.js` crashes at import. The Python suite has no third-party dependencies.
+> **Node version note:** the JS suite is verified on **Node.js 22+**. On Node 20 the 11 pure-logic tests pass but `tests/ui.test.js` may crash at import. The Python suite has no third-party dependencies.
 
 ## Repository layout
 
 ```text
 .
 ├── index.html                     # semantic markup; root entry point for static hosting
+├── Dockerfile                     # multi-stage Docker build, non-root user, healthcheck
+├── docker-compose.yml             # full stack with persistent gvp-data volume
+├── .dockerignore                  # excludes Git, cache, node_modules, data, secrets
 ├── assets/
 │   ├── css/app.css                # all styling
 │   └── js/                        # 8 ES modules, no build step:
-│       ├── config.js              #   thresholds, buffer size, API base, default polygon
+│       ├── config.js              #   thresholds, buffer size, API base, default polygon, auth keys
+│       ├── auth.js                #   login/logout/register, JWT storage, fetchWithAuth
 │       ├── core.js                #   DOM-free pure logic: geometry, zone diff, scoring, STATUS enum, report
-│       ├── camera.js              #   recorded file / webcam sources, frame capture, safe seeking
+│       ├── camera.js              #   file/webcam/RTSP sources, frame capture, safe seeking
 │       ├── zone.js                #   editable normalised GVP polygon overlay
-│       ├── evidence.js            #   rolling 30-frame buffer, before/during/after painting
+│       ├── evidence.js            #   rolling buffer, object-storage upload, signed URL download
 │       ├── monitor.js             #   live scene-stability heuristic (NOT tracking / stop timer / dumping model)
 │       ├── storage.js             #   localStorage ⇄ /api/v1 dual-mode persistence
-│       └── app.js                 #   orchestration and DOM wiring
+│       └── app.js                 #   orchestration, DOM wiring, auth guards, SSE alerts
 ├── backend/                       # optional FastAPI + SQLite on one origin
-│   ├── app.py  db.py  schemas.py  test_db.py  requirements.txt  README.md
+│   ├── app.py                     #   API + monitoring + SSE alerts + RTSP endpoints
+│   ├── auth.py                    #   JWT auth, password hashing, role-based deps
+│   ├── db.py                      #   SQLite: incidents, decisions, audit, users, sessions, cameras, zones, evidence
+│   ├── rtsp_capture.py            #   OpenCV VideoCapture RTSP daemon with auto-reconnect
+│   ├── schemas.py                 #   Pydantic request/response models
+│   ├── test_db.py                 #   dependency-free unittest suite
+│   ├── requirements.txt           #   fastapi, uvicorn, pydantic, opencv-python-headless
+│   └── README.md                  #   run + endpoint reference
+├── tools/
+│   ├── video_test_harness.py      #   seven golden scenarios
+│   ├── kpi_harness.py             #   KPI metrics with Wilson score CIs
+│   ├── test_record_storage.py     #   append-only test record log
+│   ├── track_vehicles.py          #   ByteTrack tracking (DEMO STAGE)
+│   ├── anpr_pipeline.py           #   plate OCR + dumping-event cue (DEMO STAGE)
+│   └── ...                        #   calibration, association, weight download, dataset URLs
 ├── tests/                         # core.test.js (pure logic) + ui.test.js (jsdom)
 ├── docs/
 │   ├── README.md                  # documentation index, status matrix, conventions, watchlist
@@ -103,7 +175,10 @@ python3 -m unittest backend.test_db -v       # 5 SQLite tests
 │   ├── 14_TEAM_WORKFLOW.md        # 4 roles × 2 members: responsibilities, RACI, Git workflow, DoR/DoD
 │   ├── 15_IMPLEMENTATION_STATUS.md# code ledger and claim boundaries
 │   ├── 16_TEAM_ROSTER_AND_OWNERSHIP.md # confirmed roster, file ownership, judge-Q&A owners
-│   └── hackathon/                 # SUBMISSION_BRIEF.md + JUDGE_QA.md (mirrors of the PDF-only facts)
+│   ├── GMC_PERMISSION_WORKFLOW.md # GMC permission request + footage handling
+│   ├── OFFICER_TRAINING_MATERIALS.md # officer training guide
+│   ├── MVP2_PLAN.md               # MVP-2 pilot & field validation plan
+│   └── hackathon/                 # SUBMISSION_BRIEF.md + JUDGE_QA.md
 ├── README.md  CONTRIBUTING.md  CHANGELOG.md  .gitignore
 └── package.json  package-lock.json # dev-only test tooling (jsdom); the app itself has no dependencies
 ```
@@ -118,6 +193,7 @@ python3 -m unittest backend.test_db -v       # 5 SQLite tests
 | **Planning & delivery** | [11 Roadmap](docs/11_DEVELOPMENT_ROADMAP.md) · [12 Backlog](docs/12_BACKLOG.md) · [13 Demo & Acceptance](docs/13_DEMO_AND_ACCEPTANCE.md) |
 | **Team** | [14 Team Workflow](docs/14_TEAM_WORKFLOW.md) · [16 Roster & Ownership](docs/16_TEAM_ROSTER_AND_OWNERSHIP.md) |
 | **Truth about the code** | [15 Implementation Status](docs/15_IMPLEMENTATION_STATUS.md) · [backend/README.md](backend/README.md) |
+| **Pilot & field** | [GMC Permission Workflow](docs/GMC_PERMISSION_WORKFLOW.md) · [Officer Training Materials](docs/OFFICER_TRAINING_MATERIALS.md) · [MVP-2 Plan](docs/MVP2_PLAN.md) |
 | **Hackathon submission** | [Submission Brief](docs/hackathon/SUBMISSION_BRIEF.md) · [Judge Q&A + terminology](docs/hackathon/JUDGE_QA.md) |
 
 [docs/README.md](docs/README.md) is the full index with the reading order, status matrix and consistency watchlist. The two source PDFs (16-page team handbook, 8-slide judge deck) are submission artifacts and are **not committed**; their facts are mirrored in `docs/hackathon/`.
@@ -139,7 +215,7 @@ Four roles, two members each (confirmed 2026-11-06). Workflow, RACI and Git rule
 
 Every document, slide and demo answer in this repository follows these rules (full table: [docs/hackathon/JUDGE_QA.md](docs/hackathon/JUDGE_QA.md)):
 
-- Say **"review-ready incident record"** — never "legally admissible evidence".
+- Say **\"review-ready incident record\"** — never "legally admissible evidence".
 - Label every feature **WORKING / DEMO STAGE / PLANNED / EXTERNAL DEPENDENCY**.
 - The live monitor is a **scene-stability heuristic** — not vehicle detection/tracking, not a stop timer, not a dumping model. The cue score and fixed 8% threshold are **uncalibrated heuristics**.
 - **No accuracy, false-alert, impact or response-time percentages** without documented tests stating hardware, footage conditions and sample size. Pilot targets are targets, not achievements.
@@ -154,4 +230,4 @@ Every document, slide and demo answer in this repository follows these rules (fu
 
 ---
 
-*Current maturity: MVP-1 technical proof. Step 4 (vehicle detection + multi-frame ANPR) is deferred. Nothing in this repository has been validated in the field.*
+*Current maturity: MVP-1 technical proof + MVP-2 pilot tooling + platform hardening (auth, RTSP, Docker, monitoring). Step 4 (vehicle detection + multi-frame ANPR) is deferred. Nothing in this repository has been validated in the field.*
