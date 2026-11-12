@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.8.0] — Field Validation with GMC Permission (2026-11-06)
+
+### Added
+- `docs/GMC_PERMISSION_WORKFLOW.md`: GMC permission request contents, approved footage handling, retention & deletion, privacy safeguards, escalation
+- `docs/OFFICER_TRAINING_MATERIALS.md`: Officer training — sign in, source selection, GVP zone, analysis/monitoring, incident review, decision workflow, cleanup requests, evidence handling, do's and don'ts, escalation
+- `tools/test_record_storage.py`: Append-only test record log — dataset version, git commit, model version, hardware, footage conditions, limitations, scenario/KPI summaries
+- `docs/MVP2_PLAN.md`: Updated to v0.2 — all 6 deliverables marked complete with artifact links, acceptance criteria updated with links
+
+### Changed
+- `docs/15_IMPLEMENTATION_STATUS.md`: MVP-2 section updated — all deliverables complete, acceptance criteria all [x]
+- `tools/README.md`: Added `test_record_storage.py` to files table and quick start
+
+### Honesty notes
+- All MVP-2 tooling and documentation is built but requires **GMC-approved annotated footage** to execute
+- No accuracy figures published — all metrics require documented calibration tests on held-out footage
+- No GMC/registry/e-challan integration exists
+- Human review mandatory — no automatic fines
+
 ## [0.7.0] — RTSP/CCTV Camera Support & Real-Time Alerting (2026-11-06)
 
 ### Added

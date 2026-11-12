@@ -17,6 +17,7 @@ held-out test footage. No accuracy figures published without documented tests.
 | `anpr_pipeline.py` | Full pipeline: detect → track → plate OCR → dumping-event cue → `anpr_results.json` |
 | `calibrate_step4.py` | Confidence calibration: precision/recall/F1 on held-out footage → `calibration_results.json` |
 | `associate_incidents.py` | Convert `anpr_results.json` incident candidates into SQLite incident records |
+| `test_record_storage.py` | Append-only test record log: dataset version, commit, model version, config, results, limitations → `test_records.json` |
 | `ground_truth_template.json` | Template for ground-truth annotations for calibration |
 | `requirements.txt` | Python dependencies: ultralytics, opencv-python, numpy, easyocr, Pillow |
 | `dataset_acquisition.md` | Exact dataset URLs (Indian plates + vehicle detection) |
@@ -45,6 +46,9 @@ python tools\associate_incidents.py --input anpr_results.json --db backend/data/
 
 # 7. Run calibration (needs ground-truth annotations)
 python tools\calibrate_step4.py --source path\to\test.mp4 --weights models\weights\yolo11n.pt --ground-truth tools\ground_truth.json
+
+# 8. Store test record for the release
+python tools\test_record_storage.py --commit <sha> --test-results test_results.json --kpi-results kpi_results.json --output test_records.json
 ```
 
 ## What this proves

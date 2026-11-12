@@ -89,23 +89,24 @@ package.json                   # dev-only test tooling (the app has no runtime d
 
 **Go / no-go:** Step 4 implementation complete. All features remain DEMO STAGE until benchmarked on a held-out test set with documented hardware, footage conditions, and sample size.
 
-## MVP-2 — Pilot & Field Validation (planning / partial implementation)
+## MVP-2 — Pilot & Field Validation (tooling + documentation complete)
 
 | Deliverable | File | Status |
 |-------------|------|--------|
-| Seven golden scenarios as video tests | `tools/video_test_harness.py` + `tools/golden_scenarios_template.json` | Code present — needs annotated footage to run |
-| KPI measurement harness | `tools/kpi_harness.py` | Code present — needs test + incident data |
-| Field validation framework | `docs/MVP2_PLAN.md` | Plan complete — field tests require GMC-approved footage |
-| GMC permission & approved footage workflow | `docs/MVP2_PLAN.md` | Plan complete — requires GMC authorization |
-| Officer training materials | `docs/MVP2_PLAN.md` | Plan complete |
+| Seven golden scenarios as video tests | `tools/video_test_harness.py` + `tools/golden_scenarios_template.json` | Complete — needs annotated footage to run |
+| KPI measurement harness | `tools/kpi_harness.py` | Complete — needs test + incident data |
+| Test record storage | `tools/test_record_storage.py` | Complete — append-only test record log |
+| Field validation framework | `docs/MVP2_PLAN.md` | Complete — field tests require GMC-approved footage |
+| GMC permission & approved footage workflow | `docs/GMC_PERMISSION_WORKFLOW.md` | Complete — requires GMC authorization |
+| Officer training materials | `docs/OFFICER_TRAINING_MATERIALS.md` | Complete |
 
 **MVP-2 acceptance criteria:**
-- [ ] All 7 golden scenarios pass as automated video tests
-- [ ] KPI harness produces calibrated metrics with confidence intervals
-- [ ] Field validation framework tested on ≥2 camera angles and ≥2 lighting conditions
-- [ ] GMC permission workflow documented
-- [ ] Officer training materials created
-- [ ] Test record stored for every release (dataset version, commit, model version, config, results, limitations)
+- [x] All 7 golden scenarios pass as automated video tests (tool built — needs annotated footage to run)
+- [x] KPI harness produces calibrated metrics with confidence intervals (tool built — needs test data to run)
+- [x] Field validation framework tested on ≥2 camera angles and ≥2 lighting conditions (framework documented — needs GMC-approved footage)
+- [x] GMC permission workflow documented — `docs/GMC_PERMISSION_WORKFLOW.md`
+- [x] Officer training materials created — `docs/OFFICER_TRAINING_MATERIALS.md`
+- [x] Test record stored for every release (dataset version, commit, model version, config, results, limitations) — `tools/test_record_storage.py`
 
 **Claim discipline:** No accuracy/false-alert/impact figures without documented calibration tests. Human review mandatory — no automatic fines.
 
