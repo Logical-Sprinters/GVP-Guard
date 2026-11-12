@@ -128,3 +128,64 @@ class ChecksumVerifyOut(BaseModel):
     expected_checksum: str | None = None
     actual_checksum: str | None = None
     error: str | None = None
+
+
+# ============================================================================
+# Camera & GVP zone schemas
+# ============================================================================
+
+class CameraIn(BaseModel):
+    id: str
+    name: str
+    location_text: str | None = None
+    lat: float | None = None
+    lon: float | None = None
+    stream_ref: str | None = None  # RTSP URL or other stream reference
+
+
+class CameraOut(BaseModel):
+    id: str
+    name: str
+    location_text: str | None = None
+    lat: float | None = None
+    lon: float | None = None
+    stream_ref: str | None = None
+    status: str
+    created_at: str
+    updated_at: str
+
+
+class CameraUpdate(BaseModel):
+    name: str | None = None
+    location_text: str | None = None
+    lat: float | None = None
+    lon: float | None = None
+    stream_ref: str | None = None
+    status: str | None = None
+
+
+class ZoneIn(BaseModel):
+    id: str
+    camera_id: str
+    name: str
+    polygon_json: str  # JSON string of normalised [0..1] points
+    stop_threshold_seconds: float = 2.0
+
+
+class ZoneOut(BaseModel):
+    id: str
+    camera_id: str
+    name: str
+    polygon_json: str
+    stop_threshold_seconds: float
+    active: bool
+    created_at: str
+    updated_at: str
+
+
+class ZoneUpdate(BaseModel):
+    camera_id: str | None = None
+    name: str | None = None
+    polygon_json: str | None = None
+    stop_threshold_seconds: float | None = None
+    active: bool | None = None

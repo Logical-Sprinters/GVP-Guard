@@ -11,12 +11,13 @@ import { createStorage } from './storage.js';
 import { createVehicleDetector, createStopTimer } from './vehicle-detection.js';
 import {
   isAuthenticated, isRole, isAnyRole,
-  login, logout, register, loadStoredUser
+  login, logout, register, loadStoredUser, fetchWithAuth
 } from './auth.js';
 
 const $ = id => document.getElementById(id);
 const video = $('vid');
 const stage = $('stage');
+const mjpegImg = $('mjpegImg');
 
 function loadPolygon() {
   try {
@@ -265,7 +266,7 @@ function drawDetectionOverlay(detections) {
   }
 }
 
-const camera = createCamera(video);
+const camera = createCamera(video, mjpegImg);
 const evidence = createEvidenceBuffer(CONFIG.monitor.bufferSize);
 const storage = createStorage();
 
@@ -289,7 +290,13 @@ function clearSteps() {
 }
 
 function showVideo() {
-  video.style.display = 'block';
+  if (camera.mode === 'rtsp') {
+    video.style.display = 'none';
+    if (mjpegImg) mjpegImg.style.display = 'block';
+  } else {
+    video.style.display = 'block';
+    if (mjpegImg) mjpegImg.style.display = 'none';
+  }
   $('empty').style.display = 'none';
   requestAnimationFrame(() => { zoneEditor.sizeCanvas(); zoneEditor.draw(); });
 }
@@ -326,6 +333,9 @@ function resetIncidentUI(clearSource) {
     updateMonitorUI();
     $('monitorState').textContent = 'Idle • scene-stability heuristic, not vehicle tracking';
   }
+
+  // Hide RTSP-specific UI when clearing
+  if (mjpegImg) mjpegImg.style.display = 'none';
 }
 
 function getStableSeconds() {
@@ -818,6 +828,29 @@ function wireEvents() {
     } catch (error) { alert('Webcam unavailable: ' + error.message); }
   };
 
+  $('srcRTSP').onclick = async () => {
+    const cameraId = $('rtspCameraId').value.trim();
+    if (!cameraId) { alert('Enter a camera ID.'); return; }
+    try {
+      await camera.useRTSP(cameraId);
+      showVideo();
+      state.filename = 'RTSP: ' + cameraId;
+      $('filename').textContent = 'RTSP: ' + cameraId;
+      $('camera').textContent = cameraId;
+      $('stopWebcam').disabled = false;
+      $('note').textContent = 'RTSP camera connected. Scene-stability monitoring available.';
+      updateMonitorUI();
+      // Fetch camera health
+      try {
+        const resp = await fetchWithAuth(`${CONFIG.apiBase}/cameras/${encodeURIComponent(cameraId)}/health`);
+        if (resp.ok) {
+          const health = await resp.json();
+          $('note').textContent = `RTSP: ${cameraId} • ${health.streaming ? 'streaming' : 'connecting'} • ${health.fps} fps`;
+        }
+      } catch { /* health check is best-effort */ }
+    } catch (error) { alert('RTSP camera unavailable: ' + error.message); }
+  };
+
   $('stopWebcam').onclick = () => resetIncidentUI(true);
 
   $('editZone').onclick = () => {
@@ -1028,6 +1061,32 @@ async function init() {
   await refreshHistory();
   updateMonitorUI();
   $('monitorState').textContent = 'Idle • scene-stability heuristic, not vehicle tracking';
+
+  // Connect to real-time alert SSE stream
+  if (authState) {
+    const evtSource = new EventSource(`${CONFIG.apiBase}/alerts/stream`);
+    evtSource.onmessage = (event) => {
+      try {
+        const alert = JSON.parse(event.data);
+        if (alert.type === 'connected') {
+          return; // ignore connection ack
+        }
+        if (alert.type === 'heartbeat') {
+          return;
+        }
+        // Display alert in the UI
+        const msg = alert.scene_change_pct !== undefined
+          ? `RTSP alert: zone diff ${alert.scene_change_pct.toFixed(1)}% (stable ${alert.stable_for.toFixed(1)}s)`
+          : JSON.stringify(alert);
+        $('note').textContent = msg;
+        $('monitorState').textContent = 'Alert: ' + msg;
+      } catch { /* ignore malformed alert */ }
+    };
+    evtSource.onerror = () => {
+      // SSE connection issues are non-fatal; monitoring still works via polling
+      evtSource.close();
+    };
+  }
 }
 
 init();

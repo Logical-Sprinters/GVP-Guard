@@ -8,8 +8,10 @@ Camera / Video -> Edge or Ingestion Service -> Event AI -> ANPR
 ```
 
 ## Components
-1. **Video ingestion**: uploaded file, webcam or future RTSP stream.
+1. **Video ingestion**: uploaded file, webcam or RTSP/CCTV stream (same-origin MJPEG proxy via backend).
 2. **Zone manager**: camera metadata and GVP polygons.
+3. **RTSP capture service**: OpenCV VideoCapture backend daemon that reads RTSP streams and re-encodes as MJPEG frames for same-origin consumption. Auto-reconnects with exponential backoff.
+4. **Real-time alerting**: Server-Sent Events (SSE) stream for scene-stability alerts from RTSP cameras.
 3. **Vehicle/activity detector**: detections and track IDs.
 4. **Event engine**: stop timer, person/object cues and scene comparison.
 5. **ANPR service**: plate detection, frame quality, enhancement, OCR and voting.
@@ -31,9 +33,10 @@ Future edge nodes should decode video, limit processing to regions/events and up
 
 ## Failure paths
 - Network unavailable: local queue and later sync.
+- RTSP stream disconnected: auto-reconnect with exponential backoff; camera status set to offline/error.
+- Camera moved/blocked: health alert via SSE.
 - Plate unreadable: retain event; plate status `MANUAL_REVIEW`.
 - Low event confidence: review, never automatic action.
-- Camera moved/blocked: health alert.
 - Duplicate incident: deduplicate by camera, track and time window.
 
 ## Observability

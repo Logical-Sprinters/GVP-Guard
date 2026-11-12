@@ -113,6 +113,29 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_evidence_access_log ON evidence_access_log(storage_key, accessed_at);
             CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
             CREATE INDEX IF NOT EXISTS idx_user_sessions_user ON user_sessions(user_id);
+            CREATE TABLE IF NOT EXISTS cameras (
+                id             TEXT PRIMARY KEY,
+                name           TEXT NOT NULL,
+                location_text  TEXT,
+                lat            REAL,
+                lon            REAL,
+                stream_ref     TEXT,           -- RTSP URL or other stream reference
+                status         TEXT NOT NULL DEFAULT 'offline',  -- online | offline | error | pending
+                created_at     TEXT NOT NULL,
+                updated_at     TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS gvp_zones (
+                id             TEXT PRIMARY KEY,
+                camera_id      TEXT NOT NULL,
+                name           TEXT NOT NULL,
+                polygon_json   TEXT NOT NULL,   -- normalised [0..1] points as JSON
+                stop_threshold_seconds REAL NOT NULL DEFAULT 2.0,
+                active         INTEGER NOT NULL DEFAULT 1,
+                created_at     TEXT NOT NULL,
+                updated_at     TEXT NOT NULL,
+                FOREIGN KEY (camera_id) REFERENCES cameras(id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_gvp_zones_camera ON gvp_zones(camera_id);
         ''')
         conn.commit()
 
@@ -655,3 +678,178 @@ def delete_expired_evidence(older_than_days: int = 90) -> int:
                 conn.execute('DELETE FROM evidence_items WHERE storage_key = ?', (storage_key,))
             conn.commit()
     return deleted
+
+
+# ============================================================================
+# Camera management
+# ============================================================================
+
+import uuid as _uuid
+
+
+def _cam_now():
+    return _now()
+
+
+def create_camera(camera_id: str, name: str, location_text: str | None,
+                  lat: float | None, lon: float | None,
+                  stream_ref: str | None) -> dict | None:
+    """Create a new camera. Returns the camera dict or None if ID exists."""
+    now = _cam_now()
+    with connection() as conn:
+        try:
+            conn.execute(
+                '''INSERT INTO cameras
+                   (id, name, location_text, lat, lon, stream_ref, status, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                (camera_id, name, location_text, lat, lon, stream_ref,
+                 'pending', now, now),
+            )
+            row = conn.execute(
+                'SELECT * FROM cameras WHERE id = ?', (camera_id,)
+            ).fetchone()
+        except sqlite3.IntegrityError:
+            return None
+    return dict(row) if row else None
+
+
+def get_camera(camera_id: str) -> dict | None:
+    with connection() as conn:
+        row = conn.execute(
+            'SELECT * FROM cameras WHERE id = ?', (camera_id,)
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def list_cameras() -> list[dict]:
+    with connection() as conn:
+        rows = conn.execute(
+            'SELECT * FROM cameras ORDER BY name'
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def update_camera(camera_id: str, changes: dict) -> dict | None:
+    with connection() as conn:
+        row = conn.execute(
+            'SELECT * FROM cameras WHERE id = ?', (camera_id,)
+        ).fetchone()
+        if row is None:
+            return None
+        current = dict(row)
+        current.update(changes)
+        current['updated_at'] = _cam_now()
+        conn.execute(
+            '''UPDATE cameras
+               SET name = ?, location_text = ?, lat = ?, lon = ?,
+                   stream_ref = ?, status = ?, updated_at = ?
+               WHERE id = ?''',
+            (current['name'], current.get('location_text'), current.get('lat'),
+             current.get('lon'), current.get('stream_ref'), current['status'],
+             current['updated_at'], camera_id),
+        )
+        return get_camera(camera_id)
+
+
+def delete_camera(camera_id: str) -> bool:
+    with connection() as conn:
+        cur = conn.execute(
+            'DELETE FROM cameras WHERE id = ?', (camera_id,)
+        )
+        return cur.rowcount > 0
+
+
+def update_camera_status(camera_id: str, status: str) -> dict | None:
+    """Update a camera's online/offline/error status."""
+    now = _cam_now()
+    with connection() as conn:
+        cur = conn.execute(
+            'UPDATE cameras SET status = ?, updated_at = ? WHERE id = ?',
+            (status, now, camera_id),
+        )
+        if cur.rowcount == 0:
+            return None
+        return get_camera(camera_id)
+
+
+# ============================================================================
+# GVP Zones per camera
+# ============================================================================
+
+def create_zone(zone_id: str, camera_id: str, name: str,
+                polygon_json: str, stop_threshold_seconds: float = 2.0) -> dict | None:
+    """Create a GVP zone for a camera. Returns the zone dict or None."""
+    now = _cam_now()
+    with connection() as conn:
+        camera = conn.execute(
+            'SELECT id FROM cameras WHERE id = ?', (camera_id,)
+        ).fetchone()
+        if camera is None:
+            return None
+        try:
+            conn.execute(
+                '''INSERT INTO gvp_zones
+                   (id, camera_id, name, polygon_json, stop_threshold_seconds,
+                    active, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                (zone_id, camera_id, name, polygon_json,
+                 stop_threshold_seconds, 1, now, now),
+            )
+            row = conn.execute(
+                'SELECT * FROM gvp_zones WHERE id = ?', (zone_id,)
+            ).fetchone()
+        except sqlite3.IntegrityError:
+            return None
+    return dict(row) if row else None
+
+
+def get_zone(zone_id: str) -> dict | None:
+    with connection() as conn:
+        row = conn.execute(
+            'SELECT * FROM gvp_zones WHERE id = ?', (zone_id,)
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def list_zones(camera_id: str | None = None) -> list[dict]:
+    with connection() as conn:
+        if camera_id is not None:
+            rows = conn.execute(
+                'SELECT * FROM gvp_zones WHERE camera_id = ? ORDER BY name',
+                (camera_id,),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                'SELECT * FROM gvp_zones ORDER BY name'
+            ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def update_zone(zone_id: str, changes: dict) -> dict | None:
+    with connection() as conn:
+        row = conn.execute(
+            'SELECT * FROM gvp_zones WHERE id = ?', (zone_id,)
+        ).fetchone()
+        if row is None:
+            return None
+        current = dict(row)
+        current.update(changes)
+        current['updated_at'] = _cam_now()
+        conn.execute(
+            '''UPDATE gvp_zones
+               SET camera_id = ?, name = ?, polygon_json = ?,
+                   stop_threshold_seconds = ?, active = ?, updated_at = ?
+               WHERE id = ?''',
+            (current['camera_id'], current['name'], current['polygon_json'],
+             current['stop_threshold_seconds'], current['active'],
+             current['updated_at'], zone_id),
+        )
+        return get_zone(zone_id)
+
+
+def delete_zone(zone_id: str) -> bool:
+    with connection() as conn:
+        cur = conn.execute(
+            'DELETE FROM gvp_zones WHERE id = ?', (zone_id,)
+        )
+        return cur.rowcount > 0
