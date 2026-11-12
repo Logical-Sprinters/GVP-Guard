@@ -420,6 +420,12 @@ function createIncident({ diff, frames, source, stableFor = null }) {
   }
   // Persist pending incidents too; the earlier demo only saved after a decision.
   storage.upsert(incident).then(async () => {
+    // Upload evidence frames to object storage (API mode only — offline keeps data URLs in localStorage)
+    if (frames && storage.isRemote()) {
+      await storage.uploadEvidence(incident.id, 'before', frames.before?.dataUrl || null, 'image/jpeg');
+      await storage.uploadEvidence(incident.id, 'during', frames.during?.dataUrl || null, 'image/jpeg');
+      await storage.uploadEvidence(incident.id, 'after', frames.after?.dataUrl || null, 'image/jpeg');
+    }
     await refreshHistory();
     await loadCleanupSection();
   }).catch(() => {});

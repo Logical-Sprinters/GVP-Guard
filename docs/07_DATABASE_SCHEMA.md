@@ -23,7 +23,10 @@
 `id, incident_id, type, color, plate_candidate, plate_confidence, review_status`
 
 ### evidence_items
-`id, incident_id, kind, storage_key, mime_type, captured_at, checksum_nullable`
+`id, incident_id, kind, storage_key, mime_type, size_bytes, checksum_sha256, captured_at, created_at`
+
+### evidence_access_log
+`id, storage_key, actor_id, action, accessed_at, ip_address`
 
 ### decisions
 `id, incident_id, reviewer_id, decision, comment, reviewed_plate, created_at`
@@ -44,6 +47,6 @@
 ## Storage
 Database stores metadata and opaque object keys. Clips/images remain in controlled object storage with signed access URLs.
 
-## Implementation status (2026-11-05)
+## Implementation status (2026-11-06)
 
-`incidents`, `decisions`, `audit_events` and `cleanup_requests` exist in the SQLite prototype (`backend/db.py`). Evidence frames are stored as JPEG data URLs inside the incident payload — there is no object storage, signed URL, checksum or chain-of-custody implementation. `cameras`, `gvp_zones`, `analysis_jobs`, `tracks`, `vehicles` and `evidence_items` remain draft. Immutable audit enforcement and retention/expiration jobs are not implemented.
+`incidents`, `decisions`, `audit_events`, `cleanup_requests`, `evidence_items` and `evidence_access_log` exist in the SQLite prototype (`backend/db.py`). Evidence frames are stored as individual files under `data/evidence/` with opaque storage keys and SHA-256 checksums. Signed, time-limited URLs gate all evidence access. Chain-of-custody access log records every view/download/verify action. `cameras`, `gvp_zones`, `analysis_jobs`, `tracks`, `vehicles` remain draft. Retention/expiration jobs (`delete_expired_evidence`) are implemented but not scheduled.

@@ -55,9 +55,12 @@ package.json                   # dev-only test tooling (the app has no runtime d
 | Incident record | `app.js`, `core.js` | Canonical `statusCode`, `triggerReasons`, `reviewer`, `comment`, `reviewedAt`, `source` |
 | Officer approve / reject / cleanup | `app.js` | Writes incident + decision + audit row |
 | Cleanup-request workflow | `backend/app.py`, `backend/db.py`, `app.js` | `POST /incidents/{id}/cleanup-request`, `GET /incidents/{id}/cleanup-request`, `GET /cleanup-requests`, `PATCH /cleanup-requests/{id}`; SQLite `cleanup_requests` table; UI request/complete flow |
-| Evidence download | `backend/app.py`, `assets/js/storage.js`, `app.js`, `index.html` | `GET /incidents/{id}/evidence`, `GET /evidence/{incident_id}/{frame}`; per-frame download buttons (before/during/after); offline canvas fallback |
+| Evidence object storage | `backend/db.py`, `backend/app.py`, `assets/js/storage.js`, `app.js` | Evidence frames stored as files under `data/evidence/` with SHA-256 checksums; `POST/GET /incidents/{id}/evidence`, `GET /evidence/{storage_key}`, `GET /evidence/{storage_key}/download`, `GET /evidence/{storage_key}/checksum`, `GET /evidence/{storage_key}/access-log`; signed, time-limited URLs; chain-of-custody access log |
+| Evidence download | `assets/js/storage.js`, `app.js`, `index.html` | Signed URL token flow; per-frame download buttons (before/during/after); offline canvas fallback |
 | Dual-mode persistence | `storage.js` | `localStorage` offline; FastAPI + SQLite via **relative** `/api/v1` URLs when available |
-| API endpoints | `backend/app.py` | health, incidents CRUD-ish, decisions, audit, export, GVPs, summary |
+| API endpoints | `backend/app.py` | health, incidents CRUD-ish, decisions, audit, export, GVPs, summary, evidence object storage |
+| Rate limiting | `backend/app.py` | In-memory sliding window per client IP: 60 req/60s default, 10 auth req/60s, 30 evidence write req/60s; 429 with Retry-After |
+| Security headers | `backend/app.py` | CSP, X-Content-Type-Options: nosniff, X-Frame-Options: DENY, Referrer-Policy: no-referrer, Permissions-Policy |
 | Transparent GVP priority score | `core.js`, `db.py` | Fixed published weights; capped at 100; not a prediction model |
 | Test harness | `tests/`, `backend/test_db.py` | 14 JS tests + 5 Python tests |
 
@@ -104,7 +107,9 @@ package.json                   # dev-only test tooling (the app has no runtime d
 
 ## Explicitly NOT implemented (claim discipline)
 
-Authentication, roles, rate limiting, object storage, signed evidence URLs, malware scanning, retention/deletion jobs, checksums or chain of custody, live CCTV/RTSP, official GMC/registry/e-challan integration, and any measured accuracy, false-alert or impact figure without documented calibration tests.
+Malware scanning, scheduled retention/deletion jobs (delete_expired_evidence exists but is not scheduled), live CCTV/RTSP, official GMC/registry/e-challan integration, and any measured accuracy, false-alert or impact figure without documented calibration tests.
+
+Authentication, roles, object storage, signed evidence URLs, checksums and chain-of-custody access logging, rate limiting, and security headers are now implemented (see above).
 
 The UI now uses canonical `STATUS` codes (`SUSPICIOUS` / `CANDIDATE`) from `classify()` and renders them via `STATUS_LABEL`. Canonical enum codes are stored in `statusCode`. The fixed 8% zone-diff threshold and illustrative cue score remain uncalibrated heuristics (labelled as such).
 
