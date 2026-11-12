@@ -45,6 +45,36 @@
 - All Step 4 features remain DEMO STAGE — stop time alone does NOT imply guilt
 - Human review mandatory — no automatic fines or guilt
 
+## [0.9.1] — Step 4 Vehicle AI Benchmarking (2026-11-07)
+
+### Added
+- `models/manifest.json`: weight file SHA-256 hashes and sources for YOLO11n/yolo11s (weights NOT committed to Git)
+- `tools/generate_scenarios.py`: synthetic video generator for 7 golden scenarios (GS-01 to GS-07)
+- `tests/data/scenarios/`: synthetic test videos + ground truth + benchmark + tracking + ANPR + calibration results
+- `tests/data/scenarios/test_records.json`: append-only test record (commit a8bbbbf, model yolo11n, dataset synthetic-v1)
+
+### Changed
+- `docs/15_IMPLEMENTATION_STATUS.md`: Step 4 DEMO STAGE table updated with benchmarking results; prerequisites updated with actual measured values
+- `docs/STEP4_READINESS_PLAN.md`: benchmarking results table added; go/no-go record updated (NOT READY — controlled dataset still required)
+- `.gitignore`: added `models/weights/` exclusion
+
+### Benchmarking results (synthetic footage, CPU)
+| Metric | Measured | Target |
+|--------|----------|--------|
+| Detection FPS | 11–16 FPS | ≥ 5 FPS ✅ |
+| Inference latency | 74–110 ms/frame | ≤ 200 ms ✅ |
+| Scenario pass rate | 2/7 (28.6%) | — |
+| False alerts per camera-hour | 1.14 | ≤ 2 |
+| Person detection | Not validated | — |
+| Plate OCR | Not validated | — |
+
+### Honesty notes
+- All Step 4 features remain DEMO STAGE — not WORKING until validated on held-out real footage with annotated persons and plates
+- Person detection and plate OCR not validated (synthetic figures not detected by YOLO11n; no readable plates in synthetic car crops)
+- Controlled dataset from a permitted GVP site still required (GMC approval needed)
+- No accuracy/false-alert/impact figures published without documented calibration tests
+- Human review mandatory — no automatic fines or guilt
+
 ## [0.7.0] — RTSP/CCTV Camera Support & Real-Time Alerting (2026-11-06)
 
 ### Added

@@ -68,26 +68,26 @@ package.json                   # dev-only test tooling (the app has no runtime d
 | Transparent GVP priority score | `core.js`, `db.py` | Fixed published weights; capped at 100; not a prediction model |
 | Test harness | `tests/`, `backend/test_db.py` | 14 JS tests + 5 Python tests |
 
-## DEMO STAGE (Step 4 — readiness complete, code present but not benchmarked)
+## DEMO STAGE (Step 4 — benchmarked on synthetic test footage)
 
 | Capability | Where | Notes |
 |------------|-------|-------|
-| Vehicle detection (YOLO11n ONNX via OpenCV DNN) | `assets/js/vehicle-detection.js` | DEMO STAGE — code present, weights NOT committed (`models/weights/yolo11n.onnx` per `docs/STEP4_READINESS_PLAN.md`) |
-| Vehicle stop timer | `assets/js/vehicle-detection.js` | DEMO STAGE — measures stop duration inside GVP polygon; stop time alone does NOT imply guilt |
-| Vehicle tracking (YOLO11n + ByteTrack) | `tools/track_vehicles.py` | DEMO STAGE — Python reference script; per-track stop durations inside GVP polygon |
-| Plate detection + multi-frame OCR/ANPR | `tools/anpr_pipeline.py` | DEMO STAGE — EasyOCR plate reads on vehicle tracks, multi-frame consensus, `anpr_results.json` |
-| Dumping-event cue | `tools/anpr_pipeline.py` | DEMO STAGE — stopped vehicle + person overlap = suspected dumping event flag |
-| Confidence calibration | `tools/calibrate_step4.py` | DEMO STAGE — precision/recall/F1 for detection, plate OCR, dumping cue on held-out footage |
+| Vehicle detection (YOLO11n) | `tools/benchmark_detection.py`, `assets/js/vehicle-detection.js` | DEMO STAGE — benchmarked on synthetic footage: 11–16 FPS, 74–110 ms/frame, car/truck/bus/motorcycle detected |
+| Vehicle stop timer | `assets/js/vehicle-detection.js`, `tools/track_vehicles.py` | DEMO STAGE — measures stop duration inside GVP polygon; stop time alone does NOT imply guilt |
+| Vehicle tracking (YOLO11n + ByteTrack) | `tools/track_vehicles.py` | DEMO STAGE — Python reference script; per-track stop durations inside GVP polygon; track IDs persist across frames |
+| Plate detection + multi-frame OCR/ANPR | `tools/anpr_pipeline.py` | DEMO STAGE — EasyOCR plate reads on vehicle tracks, multi-frame consensus, `anpr_results.json`; not validated (no readable plates in synthetic footage) |
+| Dumping-event cue | `tools/anpr_pipeline.py` | DEMO STAGE — stopped vehicle + person overlap = suspected dumping event flag; not validated (persons not detected in synthetic footage) |
+| Confidence calibration | `tools/calibrate_step4.py` | DEMO STAGE — precision/recall/F1 for detection, plate OCR, dumping cue; calibration on GS-02 showed 0 precision due to GT box-position mismatch on synthetic footage |
 | Incident association | `tools/associate_incidents.py` | DEMO STAGE — converts `anpr_results.json` candidates into SQLite incident records via `backend/db.py` |
 
-**Prerequisites met (2026-11-07):**
-- Model weights source identified: `yolo11n.onnx` from Hugging Face / Ultralytics CDN
-- Controlled dataset source identified: Indian Truck License Plates sample (Kaggle/HF)
-- Benchmark script created: `tools/benchmark_detection.py`
-- Benchmark results on user hardware: 5.2 FPS detection, 7.4 FPS tracking (demo_car.mp4, 100 frames, 2 tracks)
-- UI integration: vehicle-detection.js wired into app.js + index.html (detection overlay, stop timer, plate reads, dumping cue badge)
+**Benchmarking complete (2026-11-07):**
+- Model weights downloaded and verified: `yolo11n.pt` (SHA-256 `0ebbc80d...`), `yolo11s.pt` (SHA-256 `85a76fe8...`); hashes in `models/manifest.json` (weights NOT committed)
+- Synthetic test footage generated for 7 golden scenarios (GS-01 to GS-07) at `tests/data/scenarios/`
+- Benchmark results: 2/7 scenarios pass (28.6%) — vehicle detection + tracking work; person detection + plate OCR not validated
+- KPI metrics: pass rate 28.6% (CI: 0.08–0.64), false alerts 1.14/camera-hour, FPS 11–16, latency 74–110 ms
+- Test records stored: `tests/data/scenarios/test_records.json` (commit a8bbbbf, model yolo11n, dataset synthetic-v1)
 
-**Go / no-go:** Step 4 implementation complete. All features remain DEMO STAGE until benchmarked on a held-out test set with documented hardware, footage conditions, and sample size.
+**Go / no-go:** Step 4 implementation complete and benchmarked. All features remain DEMO STAGE until validated on held-out real footage with annotated persons and plates. Controlled dataset from a permitted GVP site still required (see `docs/STEP4_READINESS_PLAN.md`).
 
 ## MVP-2 — Pilot & Field Validation (tooling + documentation complete)
 
