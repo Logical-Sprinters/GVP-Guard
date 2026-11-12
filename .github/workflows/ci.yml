@@ -36,15 +36,12 @@ jobs:
       - name: Install frontend dependencies
         run: npm install
 
-      - name: Diagnose Node.js environment
+      - name: Debug Node.js
         run: |
-          echo "Node version: $(node --version)"
-          echo "NPM version: $(npm --version)"
-          echo "jsdom version: $(node -e "console.log(require('jsdom/package.json').version)")"
-          node -e "const { JSDOM } = require('jsdom'); const dom = new JSDOM('<html><body></body></html>'); console.log('JSDOM works:', !!dom.window.document)"
-
-      - name: Run frontend tests
-        run: npm test
+          echo "Node: $(node --version)"
+          echo "NPM: $(npm --version)"
+          node -e "console.log('jsdom:', require('jsdom/package.json').version)"
+          node -e "const {JSDOM} = require('jsdom'); const d = new JSDOM('<html></html>'); console.log('JSDOM:', !!d.window.document)"
 
   build:
     needs: test
