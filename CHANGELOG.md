@@ -18,6 +18,33 @@
 - No GMC/registry/e-challan integration exists
 - Human review mandatory — no automatic fines
 
+## [0.9.0] — Docker Containerization, CI/CD & Production Monitoring (2026-11-06)
+
+### Added
+- : Multi-stage build (builder + runtime), non-root user, OpenCV runtime deps, healthcheck
+- : Full stack with persistent  volume, bridge network, restart policy
+- : Excludes Git, Python cache, Node modules, data, secrets, test artifacts
+- : GitHub Actions CI/CD — test (Python + Node), build Docker image, deploy to staging
+- Structured JSON logging: request logs with method, path, status, duration, client IP
+- Metrics endpoint:  — Prometheus-compatible text format
+- Enhanced health endpoint:  — dependency status, camera count, online count
+- Request logging middleware: structured logs + in-memory metrics collection
+-  environment variable support for Docker secret management
+
+### Changed
+- :  now reads from  env var first
+- : Docker Compose deployment, environment variables, health checks, security
+- : Added monitoring endpoints (health, metrics)
+- : Added Docker, CI/CD, logging, metrics, health monitoring
+- /: version 0.9.0
+
+### Honesty notes
+- Rate limiting is in-memory (resets on server restart)
+- Metrics are in-memory (reset on server restart)
+- Docker healthcheck checks  every 30s
+- All Step 4 features remain DEMO STAGE — stop time alone does NOT imply guilt
+- Human review mandatory — no automatic fines or guilt
+
 ## [0.7.0] — RTSP/CCTV Camera Support & Real-Time Alerting (2026-11-06)
 
 ### Added

@@ -1,0 +1,41 @@
+# Git
+.git/
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+.venv/
+venv/
+.env
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+.next/
+dist/
+build/
+coverage/
+
+# Data and evidence (runtime-generated, git-ignored)
+backend/data/
+*.db
+*.sqlite3
+*.log
+
+# OS
+.DS_Store
+.vscode/
+.idea/
+
+# Secrets
+.secret_key
+
+# Test artifacts
+test_results.json
+kpi_results.json
+test_records.json

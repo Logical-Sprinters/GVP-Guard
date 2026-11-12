@@ -1,0 +1,44 @@
+# Docker Compose for GVP-Guard
+# Runs the FastAPI backend serving both the static frontend and /api/v1 API.
+#
+# Usage:
+#   docker compose up -d
+#   open http://localhost:8000
+#
+# Environment:
+#   GVP_SECRET_KEY - signing secret for JWT tokens and signed evidence URLs
+#   (defaults to a dev secret if not set — change in production)
+#
+# Volumes:
+#   gvp-data - persistent SQLite database and evidence storage
+
+services:
+  gvp-guard:
+    build: .
+    container_name: gvp-guard
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - GVP_SECRET_KEY=${GVP_SECRET_KEY:-gvp-guard-dev-secret-change-in-production}
+      - PORT=8000
+    volumes:
+      - gvp-data:/app/backend/data
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    networks:
+      - gvp-network
+    # Security: non-root user is set in Dockerfile
+    user: gvpguard
+
+networks:
+  gvp-network:
+    driver: bridge
+
+volumes:
+  gvp-data:
+    driver: local
