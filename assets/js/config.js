@@ -1,6 +1,8 @@
 // Central configuration. The browser app has no build step; edit here to tune the prototype.
 export const CONFIG = Object.freeze({
   apiBase: '/api/v1',
+  authTokenKey: 'gvpAuthToken',
+  authUserKey: 'gvpAuthUser',
   storageKey: 'gvpHistory',
   zoneKey: 'gvpZonePolygon',
   capture: Object.freeze({ width: 320, height: 180, jpegQuality: 0.6 }),

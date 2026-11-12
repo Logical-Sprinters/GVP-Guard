@@ -9,6 +9,10 @@ import { createEvidenceBuffer, paintFrame, clearCanvas } from './evidence.js';
 import { createMonitor } from './monitor.js';
 import { createStorage } from './storage.js';
 import { createVehicleDetector, createStopTimer } from './vehicle-detection.js';
+import {
+  isAuthenticated, isRole, isAnyRole,
+  login, logout, register, loadStoredUser
+} from './auth.js';
 
 const $ = id => document.getElementById(id);
 const video = $('vid');
@@ -31,6 +35,142 @@ const state = {
   mapZone: 'GVP-01',
   mapRisk: 'High'
 };
+
+let authState = null; // { id, username, role, token } | null
+
+/* ------------------------------- Auth UI gating ------------------------------- */
+
+function updateAuthHeader() {
+  const userInfo = $('userInfo');
+  const loginBtn = $('loginBtn');
+  const adminTab = $('adminTab');
+  const userBadge = $('userRoleBadge');
+  const userName = $('userDisplayName');
+
+  if (authState) {
+    loginBtn.style.display = 'none';
+    userInfo.style.display = 'block';
+    userBadge.textContent = (authState.role || 'viewer').toUpperCase();
+    userName.textContent = authState.username || 'user';
+    // Admin tab only for admins
+    adminTab.style.display = isRole('admin') ? 'inline-block' : 'none';
+  } else {
+    loginBtn.style.display = 'inline-block';
+    userInfo.style.display = 'none';
+    adminTab.style.display = 'none';
+  }
+}
+
+function showLogin() {
+  $('view-login').classList.add('active');
+  $('mainTabs').style.display = 'none';
+  // Hide all other views
+  document.querySelectorAll('.view').forEach(v => {
+    if (v.id !== 'view-login') v.classList.remove('active');
+  });
+  updateAuthHeader();
+}
+
+function showMain() {
+  $('view-login').classList.remove('active');
+  $('mainTabs').style.display = 'flex';
+  // Show the currently active tab's view (default live)
+  const activeTab = document.querySelector('.tab.active');
+  const view = activeTab ? activeTab.dataset.view : 'live';
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  $('view-' + view).classList.add('active');
+  updateAuthHeader();
+  if (view === 'admin') loadUsers();
+}
+
+/**
+ * Guard for write operations (incident create/decide, cleanup, etc.).
+ * Returns true if the action is allowed, false if it should be blocked with a message.
+ */
+function requireWrite() {
+  if (!authState) {
+    $('note').textContent = 'Sign in to perform write actions (offline read-only mode).';
+    return false;
+  }
+  // Officers and admins can write; viewers are read-only
+  if (!isAnyRole(['officer', 'admin'])) {
+    $('note').textContent = 'Officer or admin role required for write actions.';
+    return false;
+  }
+  return true;
+}
+
+async function loadUsers() {
+  if (!isRole('admin')) return;
+  const tbody = $('usersBody');
+  tbody.innerHTML = '<tr><td colspan="5">Loading users…</td></tr>';
+  try {
+    const resp = await fetchWithAuth(`${CONFIG.apiBase}/auth/users`);
+    if (!resp.ok) throw new Error('Failed to load users');
+    const users = await resp.json();
+    tbody.innerHTML = users.map(u => `<tr>
+      <td>${u.id}</td>
+      <td>${escapeHTML(u.username)}</td>
+      <td>
+        <select class="commentbox" data-id="${u.id}">${['viewer','officer','admin'].map(r => `<option value="${r}" ${r === u.role ? 'selected' : ''}>${r}</option>`).join('')}</select>
+      </td>
+      <td>${u.is_active ? 'Yes' : 'No'}</td>
+      <td>
+        <button class="btn light" data-id="${u.id}" data-action="role">Update role</button>
+        ${u.is_active ? `<button class="btn red" data-id="${u.id}" data-action="deactivate">Deactivate</button>` : `<button class="btn green" data-id="${u.id}" data-action="activate">Activate</button>`}
+      </td>
+    </tr>`).join('');
+
+    tbody.querySelectorAll('button[data-action="role"]').forEach(btn => {
+      btn.onclick = async () => {
+        const id = btn.dataset.id;
+        const select = tbody.querySelector(`select[data-id="${id}"]`);
+        try {
+          const resp = await fetchWithAuth(`${CONFIG.apiBase}/auth/users/${id}/role`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: select.value })
+          });
+          if (!resp.ok) throw new Error('Failed to update role');
+          $('note').textContent = 'User role updated.';
+          loadUsers();
+        } catch (e) { $('note').textContent = 'Role update failed: ' + e.message; }
+      };
+    });
+    tbody.querySelectorAll('button[data-action="deactivate"]').forEach(btn => {
+      btn.onclick = async () => {
+        const id = btn.dataset.id;
+        try {
+          const resp = await fetchWithAuth(`${CONFIG.apiBase}/auth/users/${id}`, { method: 'DELETE' });
+          if (!resp.ok) throw new Error('Failed to deactivate');
+          $('note').textContent = 'User deactivated.';
+          loadUsers();
+        } catch (e) { $('note').textContent = 'Deactivate failed: ' + e.message; }
+      };
+    });
+    tbody.querySelectorAll('button[data-action="activate"]').forEach(btn => {
+      btn.onclick = async () => {
+        // Re-activate by updating role (reactivation handled by role update)
+        const id = btn.dataset.id;
+        try {
+          const resp = await fetchWithAuth(`${CONFIG.apiBase}/auth/users/${id}/role`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: 'viewer' })
+          });
+          if (!resp.ok) throw new Error('Failed to activate');
+          $('note').textContent = 'User activated.';
+          loadUsers();
+        } catch (e) { $('note').textContent = 'Activate failed: ' + e.message; }
+      };
+    });
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="5">Error loading users: ' + escapeHTML(e.message) + '</td></tr>';
+  }
+}
+
+/* ------------------------------- Incident record (auth-guarded persistence) ------------------------------- */
+
 
 /* ------------------------------- Vehicle AI (DEMO STAGE) ------------------------------- */
 
@@ -288,6 +428,7 @@ function createIncident({ diff, frames, source, stableFor = null }) {
 /* ----------------------------- Create Incident from Vehicle AI ----------------------------- */
 
 async function createAIIncident() {
+  if (!requireWrite()) return;
   if (!vehicleAI.isActive() || vehicleAI.getDetections().length === 0) {
     alert('No Vehicle AI data available. Turn on Vehicle AI and run detection first.');
     return;
@@ -383,6 +524,7 @@ async function createAIIncident() {
 }
 
 async function runAnalysis() {
+  if (!requireWrite()) return;
   if (camera.mode === 'none') { alert('Choose a recorded video or start the webcam first.'); return; }
   if (camera.mode === 'webcam') {
     $('note').textContent = 'Live input uses scene-stability monitoring. Click Start monitoring instead.';
@@ -413,6 +555,7 @@ async function runAnalysis() {
 }
 
 async function decide(action) {
+  if (!requireWrite()) return;
   if (!state.incident) {
     $('note').textContent = 'Run analysis or monitoring before recording a decision.';
     return;
@@ -471,6 +614,7 @@ async function loadCleanupSection() {
 }
 
 async function requestCleanup() {
+  if (!requireWrite()) return;
   if (!state.incident) return;
   const assignee = $('cleanupAssigneeInput').value.trim() || null;
   const result = await storage.requestCleanup(state.incident.id, assignee);
@@ -492,6 +636,7 @@ async function requestCleanup() {
 }
 
 async function completeCleanup() {
+  if (!requireWrite()) return;
   if (!state.cleanup.id) return;
   const result = await storage.updateCleanupRequest(state.cleanup.id, { status: 'completed' });
   if (result) {
@@ -539,6 +684,7 @@ async function refreshHistory() {
 }
 
 async function seedHistory() {
+  if (!requireWrite()) return;
   const now = Date.now();
   const sample = [
     { id: 'INC-240381', demo: true, time: new Date(now - 86400000).toLocaleString(), location: 'GVP-01', sceneChange: '16.8%', plate: 'GJ 12 AB 4381', decision: 'Approved for follow-up', status: STATUS.SUSPICIOUS, statusCode: STATUS.APPROVED, source: 'Demo seed', detectionMethod: 'Sample record', evidenceFrames: null },
@@ -550,6 +696,7 @@ async function seedHistory() {
 }
 
 async function clearHistory() {
+  if (!requireWrite()) return;
   await storage.clear();
   await refreshHistory();
 }
@@ -771,11 +918,98 @@ function wireEvents() {
   document.querySelectorAll('.pin').forEach(pin => {
     pin.onclick = () => showZone(pin.dataset.zone, pin.dataset.risk);
   });
+
+  /* ---------- Auth wiring ---------- */
+  $('loginBtn').onclick = () => showLogin();
+  $('logoutBtn').onclick = async () => {
+    await logout();
+    authState = null;
+    showLogin();
+  };
+
+  $('useOffline').onclick = () => {
+    // Continue without auth: read-only, localStorage only
+    authState = null;
+    showMain();
+  };
+
+  $('doLogin').onclick = async () => {
+    const username = $('loginUsername').value.trim();
+    const password = $('loginPassword').value;
+    const errorEl = $('loginError');
+    if (!username || !password) {
+      errorEl.textContent = 'Enter username and password.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    errorEl.style.display = 'none';
+    try {
+      const user = await login(username, password);
+      authState = user;
+      $('loginError').style.display = 'none';
+      showMain();
+    } catch (e) {
+      errorEl.textContent = e.message || 'Login failed.';
+      errorEl.style.display = 'block';
+    }
+  };
+
+  // Allow Enter key to submit login
+  $('loginPassword').onkeypress = (e) => { if (e.key === 'Enter') $('doLogin').click(); };
+  $('loginUsername').onkeypress = (e) => { if (e.key === 'Enter') $('doLogin').click(); };
+
+  // Tab clicks: if not authenticated and not on login, stay on login
+  document.querySelectorAll('.tab').forEach(button => {
+    const orig = button.onclick;
+    button.onclick = (e) => {
+      if (!authState && button.dataset.view !== 'login') {
+        showLogin();
+        return;
+      }
+      if (orig) orig.call(button, e);
+      if (button.dataset.view === 'admin') loadUsers();
+    };
+  });
+
+  // Admin: create user
+  $('createUserBtn').onclick = async () => {
+    if (!isRole('admin')) { $('note').textContent = 'Admin required.'; return; }
+    const username = $('newUsername').value.trim();
+    const password = $('newPassword').value;
+    const role = $('newRole').value;
+    const errorEl = $('createUserError');
+    if (!username || !password) {
+      errorEl.textContent = 'Enter username and password.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    errorEl.style.display = 'none';
+    try {
+      await register(username, password, role);
+      $('newUsername').value = '';
+      $('newPassword').value = '';
+      $('note').textContent = 'User created.';
+      loadUsers();
+    } catch (e) {
+      errorEl.textContent = e.message || 'Registration failed.';
+      errorEl.style.display = 'block';
+    }
+  };
 }
 
 /* --------------------------------- Boot ---------------------------------- */
 
 async function init() {
+  // Restore any stored session (offline-capable: no server round-trip)
+  authState = loadStoredUser();
+  updateAuthHeader();
+
+  if (!authState) {
+    showLogin();
+  } else {
+    showMain();
+  }
+
   await storage.check();
   updateStorageUI();
   $('stableSeconds').value = CONFIG.monitor.defaultStableSeconds;

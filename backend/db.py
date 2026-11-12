@@ -4,6 +4,7 @@ Only metadata is stored in the database; evidence frames travel inside the
 incident payload as JPEG data URLs. No object storage or signed URLs yet —
 see docs/07_DATABASE_SCHEMA.md and docs/08_SECURITY_PRIVACY.md.
 """
+import hashlib
 import json
 import sqlite3
 import threading
@@ -62,6 +63,24 @@ def init_db():
                 new_json     TEXT,
                 created_at   TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS users (
+                id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                username     TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                role         TEXT NOT NULL DEFAULT 'officer',
+                created_at   TEXT NOT NULL,
+                is_active    INTEGER NOT NULL DEFAULT 1
+            );
+            CREATE TABLE IF NOT EXISTS user_sessions (
+                id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id      INTEGER NOT NULL,
+                token_hash   TEXT NOT NULL,
+                expires_at   TEXT NOT NULL,
+                created_at   TEXT NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+            CREATE INDEX IF NOT EXISTS idx_user_sessions_user ON user_sessions(user_id);
         ''')
         conn.commit()
 
@@ -281,3 +300,112 @@ def summary():
         'zones': len(gvps()),
         'generatedAt': _now()
     }
+
+
+# ============================================================================
+# User & Session CRUD
+# ============================================================================
+
+def create_user(username: str, password_hash: str, role: str = "officer") -> int | None:
+    """Create a new user. Returns user id or None if username exists."""
+    with connection() as conn:
+        try:
+            cur = conn.execute(
+                "INSERT INTO users (username, password_hash, role, created_at) VALUES (?, ?, ?, ?)",
+                (username, password_hash, role, _now()),
+            )
+            return cur.lastrowid
+        except sqlite3.IntegrityError:
+            return None
+
+
+def get_user_by_username(username: str) -> dict | None:
+    with connection() as conn:
+        row = conn.execute(
+            "SELECT id, username, password_hash, role, created_at, is_active FROM users WHERE username = ?",
+            (username,),
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def get_user_by_id(user_id: int) -> dict | None:
+    with connection() as conn:
+        row = conn.execute(
+            "SELECT id, username, password_hash, role, created_at, is_active FROM users WHERE id = ?",
+            (user_id,),
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def authenticate_user(username: str, password: str) -> dict | None:
+    """Verify username/password. Returns user dict without password_hash if valid."""
+    user = get_user_by_username(username)
+    if not user or not user.get("is_active"):
+        return None
+    import hashlib
+    expected_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
+    if user["password_hash"] != expected_hash:
+        return None
+    return {k: v for k, v in user.items() if k != "password_hash"}
+
+
+def create_session(user_id: int, token_hash: str, expires_at: str) -> int:
+    with connection() as conn:
+        cur = conn.execute(
+            "INSERT INTO user_sessions (user_id, token_hash, expires_at, created_at) VALUES (?, ?, ?, ?)",
+            (user_id, token_hash, expires_at, _now()),
+        )
+        return cur.lastrowid
+
+
+def get_session(token_hash: str) -> dict | None:
+    with connection() as conn:
+        row = conn.execute(
+            "SELECT id, user_id, token_hash, expires_at, created_at FROM user_sessions WHERE token_hash = ?",
+            (token_hash,),
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def delete_session(token_hash: str) -> bool:
+    with connection() as conn:
+        cur = conn.execute(
+            "DELETE FROM user_sessions WHERE token_hash = ?",
+            (token_hash,),
+        )
+        return cur.rowcount > 0
+
+
+def delete_expired_sessions() -> int:
+    with connection() as conn:
+        cur = conn.execute(
+            "DELETE FROM user_sessions WHERE expires_at < ?",
+            (_now(),),
+        )
+        return cur.rowcount
+
+
+def list_users() -> list[dict]:
+    with connection() as conn:
+        rows = conn.execute(
+            "SELECT id, username, role, created_at, is_active FROM users ORDER BY id"
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def update_user_role(user_id: int, role: str) -> dict | None:
+    with connection() as conn:
+        conn.execute(
+            "UPDATE users SET role = ? WHERE id = ?",
+            (role, user_id),
+        )
+        return get_user_by_id(user_id)
+
+
+def deactivate_user(user_id: int) -> bool:
+    with connection() as conn:
+        cur = conn.execute(
+            "UPDATE users SET is_active = 0 WHERE id = ?",
+            (user_id,),
+        )
+        return cur.rowcount > 0

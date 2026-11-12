@@ -1,10 +1,13 @@
 import { CONFIG } from './config.js';
+import { fetchWithAuth } from './auth.js';
 
 /**
  * Dual-mode persistence. Default is browser localStorage (fully offline).
  * When the optional FastAPI backend is reachable on the same origin, records are
  * mirrored to `/api/v1` using relative URLs (no CORS, no localhost calls).
  * If the API is unavailable, the app silently keeps working locally.
+ * Write operations use fetchWithAuth to attach the JWT bearer token when
+ * authenticated; unauthenticated API writes will trigger a session redirect.
  */
 export function createStorage(apiBase = CONFIG.apiBase) {
   let remote = false;
@@ -48,7 +51,7 @@ export function createStorage(apiBase = CONFIG.apiBase) {
   async function upsert(incident) {
     if (remote) {
       try {
-        await fetch(`${apiBase}/incidents`, {
+        await fetchWithAuth(`${apiBase}/incidents`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(incident)
@@ -65,7 +68,7 @@ export function createStorage(apiBase = CONFIG.apiBase) {
   async function recordDecision(id, payload) {
     if (!remote) return;
     try {
-      await fetch(`${apiBase}/incidents/${encodeURIComponent(id)}/decision`, {
+      await fetchWithAuth(`${apiBase}/incidents/${encodeURIComponent(id)}/decision`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -76,7 +79,7 @@ export function createStorage(apiBase = CONFIG.apiBase) {
   async function requestCleanup(incidentId, assignedTo) {
     if (!remote) return null;
     try {
-      const response = await fetch(`${apiBase}/incidents/${encodeURIComponent(incidentId)}/cleanup-request`, {
+      const response = await fetchWithAuth(`${apiBase}/incidents/${encodeURIComponent(incidentId)}/cleanup-request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ assigned_to: assignedTo || null })
@@ -89,7 +92,7 @@ export function createStorage(apiBase = CONFIG.apiBase) {
   async function updateCleanupRequest(cleanupId, changes) {
     if (!remote) return null;
     try {
-      const response = await fetch(`${apiBase}/cleanup-requests/${cleanupId}`, {
+      const response = await fetchWithAuth(`${apiBase}/cleanup-requests/${cleanupId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(changes)
@@ -133,7 +136,7 @@ export function createStorage(apiBase = CONFIG.apiBase) {
     if (remote) {
       for (const record of records) {
         try {
-          await fetch(`${apiBase}/incidents`, {
+          await fetchWithAuth(`${apiBase}/incidents`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(record)
@@ -146,7 +149,7 @@ export function createStorage(apiBase = CONFIG.apiBase) {
 
   async function clear() {
     if (remote) {
-      try { await fetch(`${apiBase}/incidents`, { method: 'DELETE' }); } catch { /* ignore */ }
+      try { await fetchWithAuth(`${apiBase}/incidents`, { method: 'DELETE' }); } catch { /* ignore */ }
     }
     window.localStorage.removeItem(CONFIG.storageKey);
   }

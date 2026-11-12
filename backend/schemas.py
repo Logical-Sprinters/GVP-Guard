@@ -4,7 +4,8 @@ The schema mirrors `docs/07_DATABASE_SCHEMA.md` in a deliberately small form:
 incidents, decisions and audit events. Extra fields are allowed so the browser
 prototype can evolve without breaking the API contract.
 """
-from pydantic import BaseModel, ConfigDict, Field
+from datetime import datetime, timedelta
+from pydantic import BaseModel, ConfigDict, Field, EmailStr
 
 
 class IncidentIn(BaseModel):
@@ -44,3 +45,44 @@ class CleanupRequestIn(BaseModel):
 class CleanupRequestUpdate(BaseModel):
     status: str | None = None
     assigned_to: str | None = None
+
+
+# ============================================================================
+# Authentication & Authorization Schemas
+# ============================================================================
+
+ROLES = ["viewer", "officer", "admin"]
+
+
+class UserRole(BaseModel):
+    role: str
+
+
+class UserIn(BaseModel):
+    username: str
+    password: str
+    role: str = "officer"
+
+
+class UserOut(BaseModel):
+    id: int
+    username: str
+    role: str
+    created_at: str | None = None
+
+
+class LoginIn(BaseModel):
+    username: str
+    password: str
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int
+    user: UserOut
+
+
+class TokenData(BaseModel):
+    username: str | None = None
+    role: str | None = None

@@ -17,19 +17,47 @@
         <small>Illegal dumping incident review prototype &bull; P. P. Savani University</small>
       </div>
     </div>
-    <div style="display:flex;gap:10px;align-items:center">
+    <div id="authHeader" style="display:flex;gap:10px;align-items:center">
       <span class="pill" id="storageMode">Local browser storage</span>
       <span class="pill">PS000048 &bull; TM004162</span>
+      <div id="userInfo" style="display:none">
+        <span id="userRoleBadge" class="pill" style="background:#1b4356;color:#add4e3">VIEWER</span>
+        <span id="userDisplayName" style="color:#add4e3">user</span>
+        <button id="logoutBtn" class="btn light" style="padding:0.4rem 0.8rem;font-size:0.85rem">Logout</button>
+      </div>
+      <button id="loginBtn" class="btn light" style="padding:0.4rem 0.8rem;font-size:0.85rem">Login</button>
     </div>
   </div>
 </header>
 
 <main class="wrap">
-  <div class="tabs">
+  <!-- Login view (shown when not authenticated) -->
+  <div class="view" id="view-login">
+    <div class="card" style="max-width:420px;margin:4rem auto">
+      <div class="hd">
+        <h2>Sign In</h2>
+      </div>
+      <div class="body" style="display:flex;flex-direction:column;gap:1rem">
+        <div class="alert" id="loginError" style="display:none"></div>
+        <label style="font-size:0.8rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Username</label>
+        <input class="commentbox" id="loginUsername" placeholder="Enter username" aria-label="Username">
+        <label style="font-size:0.8rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Password</label>
+        <input class="commentbox" id="loginPassword" type="password" placeholder="Enter password" aria-label="Password">
+        <div style="display:flex;gap:0.5rem">
+          <button class="btn green" id="doLogin">Sign In</button>
+          <button class="btn light" id="useOffline">Continue Offline</button>
+        </div>
+        <p class="notice" style="font-size:0.85rem">Demo credentials: <code>admin / admin123</code> or <code>officer / officer123</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs" id="mainTabs" style="display:none">
     <button class="tab active" data-view="live">Live Review</button>
     <button class="tab" data-view="map">GVP Map</button>
     <button class="tab" data-view="history">Incident History</button>
     <button class="tab" data-view="system">System Status</button>
+    <button class="tab" data-view="admin" id="adminTab" style="display:none">Admin</button>
   </div>
 
   <!-- ======================= LIVE REVIEW ======================= -->
@@ -336,10 +364,55 @@
     </div>
   </div>
 
+  <!-- ======================= ADMIN ======================= -->
+  <div class="view" id="view-admin">
+    <div class="grid">
+      <section class="card">
+        <div class="hd"><h2>User Management</h2></div>
+        <div class="body">
+          <div style="margin-bottom:0.75rem">
+            <label class="block" style="font-size:0.8rem">Create user</label>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+              <input class="commentbox" id="newUsername" placeholder="Username" style="flex:1;min-width:150px">
+              <input class="commentbox" id="newPassword" type="password" placeholder="Password" style="flex:1;min-width:150px">
+              <select id="newRole" style="padding:0.4rem">
+                <option value="viewer">Viewer</option>
+                <option value="officer">Officer</option>
+                <option value="admin">Admin</option>
+              </select>
+              <button class="btn green" id="createUserBtn">Create</button>
+            </div>
+            <div class="alert" id="createUserError" style="display:none;margin-top:0.4rem"></div>
+          </div>
+          <table class="itable" style="overflow:auto">
+            <thead>
+              <tr><th>ID</th><th>Username</th><th>Role</th><th>Active</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="usersBody"><tr><td colspan="5">Loading users…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+      <aside class="card">
+        <div class="hd"><h2>Roles &amp; Access</h2></div>
+        <div class="body">
+          <div class="scope">
+            <div><b>admin</b> — full access: manage users, roles, all endpoints</div>
+            <div><b>officer</b> — can review incidents, approve/reject, request cleanup</div>
+            <div><b>viewer</b> — read-only: view history, map, system status</div>
+          </div>
+          <div class="alert" style="margin-top:1rem"><strong>Write actions require authentication.</strong>
+            <div style="font-size:12px;margin-top:4px">Incident create/update/delete and cleanup endpoints are protected by role-based access. Offline mode continues to work without a server.</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
   <footer class="footer">Proof of concept using controlled footage • No automatic fine • Gandhidham validation planned after official access</footer>
 </main>
 
 <script src="https://docs.opencv.org/4.x/opencv.js" onerror="console.warn('OpenCV.js not loaded — vehicle AI overlay unavailable in this environment')"></script>
+<script type="module" src="assets/js/auth.js"></script>
 <script type="module" src="assets/js/app.js"></script>
 </body>
 </html>
