@@ -1,0 +1,70 @@
+{
+  "manifest_version": "1",
+  "created_at": "2026-11-07",
+  "updated_at": "2026-11-07",
+  "description": "Dataset provenance for Step 4 (Vehicle Detection + ANPR). Weights and datasets are NOT committed to Git — only hashes and metadata are recorded here.",
+  "datasets": {
+    "indian_truck_license_plates_sample": {
+      "name": "Indian Truck License Plates Sample",
+      "version": "1.0",
+      "license": "CC-BY-NC-4.0",
+      "source": "https://huggingface.co/datasets/witvix/indian-truck-license-plates-sample",
+      "mirror": "https://www.kaggle.com/datasets/witvixsystem/indian-truck-license-plates-sample",
+      "docs": "https://github.com/witvix/indian-truck-license-plates",
+      "downloaded_at": "2026-11-07",
+      "image_count": 470,
+      "annotation_count": 589,
+      "categories": ["license_plate"],
+      "states_covered": 29,
+      "night_photos_percent": 43,
+      "two_line_plates_percent": 69,
+      "small_plates_percent": 21,
+      "annotation_format": "COCO JSON with plate_text, state_code, layout attributes",
+      "files": {
+        "annotations": "tests/data/real_datasets/annotations_coco.json",
+        "images": "tests/data/real_datasets/img_*.jpg (16 sampled, not committed to Git)",
+        "data_yaml": "tests/data/real_datasets/data.yaml",
+      },
+      "purpose": "License plate detector training and ANPR calibration",
+      "limitations": [
+        "Only plate bounding boxes — no full vehicle boxes for IoU calibration",
+        "No person annotations — dumping-event cue not calibratable",
+        "Sampled subset (16 images of 470) stored locally; full dataset not committed"
+      ],
+    }
+  },
+  "models": {
+    "yolo11n": {
+      "task": "vehicle detection (COCO classes: car=2, truck=7, bus=5, motorcycle=3)",
+      "source": "https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo11n.pt",
+      "size_mb": 5.6,
+      "sha256_prefix": "0ebbc80d",
+      "status": "downloaded, verified",
+    },
+    "yolo11s": {
+      "task": "vehicle detection (higher accuracy than nano)",
+      "source": "https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo11s.pt",
+      "size_mb": 9.4,
+      "sha256_prefix": "85a76fe8",
+      "status": "downloaded, verified",
+    },
+    "plate_detector_yolo11n": {
+      "task": "license plate detection (fine-tuned on witvix dataset)",
+      "base_weights": "yolo11n.pt",
+      "training_script": "tools/train_plate_detector.py",
+      "inference_script": "tools/plate_detect.py",
+      "status": "not yet trained — pending ultralytics install + training run",
+      "target_metrics": {
+        "detection_mAP": ">= 0.80",
+        "precision": ">= 0.80",
+        "recall": ">= 0.75",
+      },
+    }
+  },
+  "claim_discipline": [
+    "No accuracy figures published without documented calibration tests on held-out data",
+    "Weights and dataset images are not committed to Git — only manifests and hashes",
+    "Plate detector is DEMO STAGE until benchmarked on held-out test set",
+    "Human review mandatory — no automatic fines or enforcement"
+  ]
+}
