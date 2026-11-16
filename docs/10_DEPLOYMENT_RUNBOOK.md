@@ -45,6 +45,11 @@ SQLite database and evidence files are persisted in the `gvp-data` volume.
 
 **Important:** Change `GVP_SECRET_KEY` in production. Do not commit secrets to Git.
 
+### Docker Hub credentials (CI/CD build job)
+
+The GitHub Actions build job requires `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository secrets to be configured. Without these secrets, the build job is skipped (not failed). Docker image publishing will not run until these secrets are added to the repository settings.
+
+
 ### Manual (no Docker)
 
 ```bash

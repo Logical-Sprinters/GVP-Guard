@@ -15,10 +15,10 @@ Unauthorized evidence access, tampering, leaked stream credentials, insecure upl
 - Authentication and role-based authorization
 - TLS and encrypted secrets
 - Signed evidence URLs
-- File type/size validation and malware scanning
+- File type/size validation (malware scanning listed as control but NOT yet implemented — see `docs/15_IMPLEMENTATION_STATUS.md`)
 - UUID identifiers and rate limits
 - Audit log of views and changes
-- Configurable retention/deletion jobs
+- Configurable retention/deletion jobs (delete_expired_evidence exists but is not scheduled)
 - Backup and restore tests
 - Stream credentials outside source code (RTSP URLs stored in database, not in code; never logged or returned in API responses)
 

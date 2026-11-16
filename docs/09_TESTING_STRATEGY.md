@@ -8,7 +8,7 @@
 - Performance: FPS, latency, memory, storage and concurrent cameras
 - Field: camera angle, glare, rain/dust, network loss and operator usability
 
-## Golden scenarios
+## Golden scenarios (automated via `tools/video_test_harness.py`)
 1. Normal pass — no incident
 2. Long stop, no deposit — review/reject
 3. Person deposits object — probable event
@@ -29,9 +29,12 @@ Set thresholds only after baseline tests. Always publish hardware, footage condi
 ## Test record
 Each release stores dataset version, commit, model version, configuration, results and known limitations.
 
-## Test harness (2026-11-05)
+## Test harness (2026-11-07)
 
 - `npm install && npm test` — 14 Node tests: 11 pure-logic tests for geometry, zone-limited differencing, scoring, status mapping and report notices, plus 3 jsdom tests for offline boot, XSS-safe rendering, tab behaviour and API-mode detection.
-- `python3 -m unittest backend.test_db -v` — 5 SQLite tests covering CRUD, decisions/audit, filters/summary, transparent priority scoring and clearing.
+- `python3 -m unittest backend.test_db -v` — 10 SQLite tests covering CRUD, decisions/audit, filters/summary, transparent priority scoring, cleanup requests and clearing.
+- `python tools/video_test_harness.py --scenarios <file>` — 7 golden scenario video tests (GS-01 to GS-07) using YOLO11n + ByteTrack; outputs `test_results.json`
+- `python tools/kpi_harness.py --test-results <file>` — KPI measurement with Wilson score confidence intervals; outputs `kpi_results.json`
+- `python tools/calibrate_step4.py --source <video> --ground-truth <gt.json>` — Confidence calibration: precision/recall/F1 for vehicle detection, plate OCR, dumping-event cue
 
-The golden scenarios above are not yet automated as video tests, and field tests still require GMC-approved footage. No accuracy or false-alert figures are published.
+The golden scenarios are automated as video tests via `video_test_harness.py` but need annotated footage from a permitted GVP site for accuracy validation. Field tests still require GMC-approved footage. No accuracy or false-alert figures are published without documented calibration tests.
