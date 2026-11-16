@@ -1,0 +1,6 @@
+# Whole sample as both train and val: it is a showcase, not a benchmark split.
+path: .
+train: images
+val: images
+names:
+  0: license_plate

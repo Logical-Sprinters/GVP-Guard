@@ -1,0 +1,41 @@
+[
+  {
+    "timestamp_utc": "2026-11-12T17:40:22.733294+00:00",
+    "git": {
+      "commit": "f411c02",
+      "branch": "master",
+      "commit_date": "2026-11-12 17:19:27 +0000",
+      "commit_message": "fix: Make Docker build conditional on Docker Hub secrets"
+    },
+    "model_version": "yolo11n",
+    "dataset_version": "witvix-indian-truck-license-plates-sample",
+    "hardware": "CPU (sandbox)",
+    "footage_conditions": "Real Indian truck license plates, mixed lighting, various image sizes (574x1280 to 1599x1600)",
+    "limitations": "Dataset has license plate bboxes only (not full vehicle bboxes), so vehicle detection IoU calibration not possible. Plate OCR on raw crops without dedicated plate detector. Small sample: 16 images, 17 plates. EasyOCR struggles with Indian plate formats (two-line, hand-painted fonts, obstructions).",
+    "test_results_file": "tests/data/real_datasets/plate_ocr_calibration.json",
+    "test_results_hash": "f932ac14cd7c7b0943b0255f8ac40e0f644be2e7a20b98d863a4492f6a94cb36",
+    "kpi_results_file": "tests/data/scenarios/kpi_results.json",
+    "kpi_results_hash": "2e121849f77a7527f57959168ea5be88a4de80189b043d78ad55085511ef725b",
+    "scenario_summary": {
+      "total_scenarios": null,
+      "passed": null,
+      "failed": null,
+      "pass_rate": null
+    },
+    "kpi_summary": {
+      "scenario_pass_rate": 0.2857,
+      "plate_read_rate": 0.0,
+      "evidence_completeness": 0.0,
+      "false_alerts_per_camera_hour": 1.1429,
+      "dumping_event_precision": 0.0
+    },
+    "honesty_notes": [
+      "All metrics are targets to measure, never published without documented tests.",
+      "Hardware, footage conditions, and sample size are recorded with every result.",
+      "Test records are append-only \u2014 never modify or delete historical records.",
+      "Human review mandatory \u2014 no automatic fines.",
+      "Stop time alone does NOT imply guilt.",
+      "No GMC/registry/e-challan integration."
+    ]
+  }
+]

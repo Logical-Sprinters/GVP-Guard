@@ -75,6 +75,35 @@
 - No accuracy/false-alert/impact figures published without documented calibration tests
 - Human review mandatory — no automatic fines or guilt
 
+## [0.9.2] — Step 4 Real Dataset Benchmarking (2026-11-07)
+
+### Added
+- `tests/data/real_datasets/`: 16 sampled images from witvix/indian-truck-license-plates-sample (Hugging Face, free), 589 total plate annotations across 470 images in full dataset
+- `tests/data/real_datasets/annotations_coco.json`: COCO-format license plate annotations with plate_text, state_code, layout attributes
+- `tests/data/real_datasets/ground_truth_real.json`: Ground truth in calibrate_step4 format for 16 sampled images
+- `tests/data/real_datasets/plate_ocr_calibration.json`: Plate OCR calibration on real Indian plates — 0.0% exact match (0/17), 18.2% character accuracy (30/165)
+- `tests/data/real_datasets/test_records_real.json`: Append-only test record (commit f411c02)
+
+### Changed
+- `docs/STEP4_READINESS_PLAN.md`: Added real dataset benchmarking results; updated metrics table with real plate OCR numbers; updated go/no-go record
+- `docs/15_IMPLEMENTATION_STATUS.md`: Updated Step 4 DEMO STAGE table with real calibration results
+- `models/manifest.json`: Weight SHA-256 hashes (unchanged, weights still NOT committed)
+
+### Benchmarking results (real Indian plate dataset)
+| Metric | Measured | Target |
+|--------|----------|--------|
+| Plate OCR exact match | 0.0% (0/17) | ≥ 0.60 |
+| Plate OCR character accuracy | 18.2% (30/165) | ≥ 0.85 |
+| Vehicle detection | Trucks detected in 3/5 sampled images | — |
+| FPS | 13.6 FPS | ≥ 5 ✅ |
+
+### Honesty notes
+- EasyOCR on raw plate crops (no dedicated plate detector) struggles with Indian plates — two-line formats, hand-painted fonts, small plates, night photos
+- Vehicle detection IoU calibration not possible — dataset has license plate bboxes, not full vehicle bboxes
+- Dumping-event cue not calibratable — no person annotations in dataset
+- Small sample (16 images, 17 plates) — results indicative, not definitive
+- All Step 4 features remain DEMO STAGE — not WORKING until validated on held-out real footage with full vehicle + person annotations
+
 ## [0.7.0] — RTSP/CCTV Camera Support & Real-Time Alerting (2026-11-06)
 
 ### Added

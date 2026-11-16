@@ -1,0 +1,62 @@
+{
+  "timestamp_utc": "2026-11-12T17:37:03.496340+00:00",
+  "source": "tests/data/real_datasets/",
+  "ground_truth": "tests/data/real_datasets/ground_truth_real.json",
+  "weights": "models/weights/yolo11n.pt",
+  "device": "cpu",
+  "polygon": [
+    {
+      "x": 0.1,
+      "y": 0.6
+    },
+    {
+      "x": 0.9,
+      "y": 0.6
+    },
+    {
+      "x": 0.9,
+      "y": 1.0
+    },
+    {
+      "x": 0.1,
+      "y": 1.0
+    }
+  ],
+  "iou_match_threshold": 0.5,
+  "ocr_conf_threshold": 0.2,
+  "stop_threshold_secs": 2.0,
+  "frames_processed": 16,
+  "total_frames_available": 16,
+  "wall_seconds": 1.173,
+  "effective_fps": 13.64,
+  "vehicle_detection": {
+    "true_positives": 0,
+    "false_positives": 9,
+    "false_negatives": 17,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0
+  },
+  "plate_ocr": {
+    "exact_matches": 0,
+    "total_gt_plates": 0,
+    "plate_accuracy": 0.0,
+    "character_accuracy": 0.0
+  },
+  "dumping_event_cue": {
+    "true_positives": 0,
+    "false_positives": 9,
+    "false_negatives": 0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0
+  },
+  "honesty_notes": [
+    "All metrics are DEMO STAGE \u2014 not WORKING until validated on independent held-out footage.",
+    "Vehicle detection uses YOLO11n COCO classes (car=2, bus=5, truck=7, motorcycle=3).",
+    "Plate OCR uses lower-bumper crop heuristic; dedicated plate detector recommended for production.",
+    "Dumping-event cue is a simplified person-overlap heuristic, not a trained model.",
+    "Stop time alone does NOT imply guilt. Human review mandatory.",
+    "No automatic fines or guilt \u2014 officer review required before any enforcement action."
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "total_gt_plates": 17,
+  "exact_matches": 0,
+  "plate_accuracy": 0.0,
+  "character_accuracy": 0.1818,
+  "character_correct": 30,
+  "character_total": 165,
+  "no_reads": 0,
+  "dataset": "witvix/indian-truck-license-plates-sample",
+  "images_tested": 16,
+  "notes": "Real Indian truck license plates. OCR run directly on ground-truth plate crops from 16 sampled images.",
+  "honesty_notes": [
+    "Plate OCR accuracy measured on real Indian license plate dataset (witvix/indian-truck-license-plates-sample).",
+    "Ground truth from COCO annotations (license plate bboxes + plate_text).",
+    "EasyOCR run on cropped plate regions at 0.20 confidence threshold.",
+    "Vehicle detection NOT calibrated \u2014 dataset only has plate bboxes, not full vehicle bboxes.",
+    "Small sample (16 images, 17 plates) \u2014 results indicative, not definitive."
+  ]
+}
