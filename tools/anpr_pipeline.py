@@ -2,27 +2,12 @@
 """
 Step 4 — Complete ANPR Pipeline (DEMO STAGE)
 
-End-to-end: Vehicle detection (YOLO11n) + ByteTrack tracking +
-License plate OCR (EasyOCR multi-frame consensus) +
-Dumping-event cue (stopped vehicle + person nearby) +
-Incident record output.
-
-Prerequisites:
-- ultralytics installed (torch + ultralytics) ✅
-- easyocr installed ✅
-- models/weights/yolo11n.pt downloaded ✅
-- Optional: plate detection model weights (not committed; see --plate-weights)
-
-Usage:
-    python tools\anpr_pipeline.py --source <video_or_dir> --weights models\weights\yolo11n.pt
-
-Outputs:
-    anpr_results.json — per-track plate reads + stop events + incident cues
-"""
+End-to-end: Vehicle detection (YOLO11n) + ByteTrack tracking +\nOptional plate detector (YOLO fine-tuned on Indian plates) +\nLicense plate OCR (EasyOCR multi-frame consensus) +\nDumping-event cue (stopped vehicle + person nearby) +\nIncident record output.\n\nWhen --plate-weights is provided, plate detection runs on every frame and\nEasyOCR is applied to the detected plate region (instead of a fixed bumper\ncrop). This dramatically improves OCR accuracy on Indian plates.\n\nPrerequisites:\n- ultralytics installed (torch + ultralytics)\n- easyocr installed\n- models/weights/yolo11n.pt downloaded\n- Optional: trained plate detector weights (see tools/train_plate_detector.py)\n\nUsage:\n    python3 tools/anpr_pipeline.py --source <video_or_dir> --weights models/weights/yolo11n.pt\n    python3 tools/anpr_pipeline.py --source <video_or_dir> --weights models/weights/yolo11n.pt \\\n        --plate-weights runs/plate_detector/weights/best.pt\n\nOutputs:\n    anpr_results.json — per-track plate reads + stop events + incident cues\n"""
 
 import argparse
 import json
 import time
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -47,15 +32,16 @@ DEFAULT_POLYGON = [
     {"x": 0.10, "y": 1.00},
 ]
 
-# Plate region as fraction of vehicle box (lower bumper area)
-PLATE_REGION = {"ymin": 0.70, "ymax": 0.95, "xmin": 0.25, "xmax": 0.75}
+# Fallback plate region as fraction of vehicle box (lower bumper area)
+# Used only when no plate detector is available
+PLATE_REGION_FALLBACK = {"ymin": 0.70, "ymax": 0.95, "xmin": 0.25, "xmax": 0.75}
 
 
 def parse_args():
     p = argparse.ArgumentParser(description="Step 4 ANPR pipeline")
     p.add_argument("--source", required=True, help="Video file or directory of images")
     p.add_argument("--weights", default="models/weights/yolo11n.pt", help="YOLO11n .pt weights")
-    p.add_argument("--plate-weights", default=None, help="Optional plate detection .pt weights")
+    p.add_argument("--plate-weights", default=None, help="Optional trained plate detection .pt weights")
     p.add_argument("--tracker", default="bytetrack.yaml", help="ByteTrack config file")
     p.add_argument("--conf", type=float, default=0.25, help="YOLO confidence threshold")
     p.add_argument("--ocr-conf", type=float, default=0.30, help="EasyOCR confidence threshold")
@@ -136,19 +122,69 @@ def read_frame(source, is_video, idx):
         return cv2.imread(str(source[idx]))
 
 
-def crop_plate_region(frame, vehicle_box):
-    """Crop the lower bumper area of a vehicle where the plate typically sits."""
+def crop_plate_region_fallback(frame, vehicle_box):
+    """Crop the lower bumper area of a vehicle where the plate typically sits.
+    Fallback when no plate detector is available."""
     x1, y1, x2, y2 = vehicle_box
     h, w = frame.shape[:2]
-    px1 = int(x1 + (x2 - x1) * PLATE_REGION["xmin"])
-    px2 = int(x1 + (x2 - x1) * PLATE_REGION["xmax"])
-    py1 = int(y1 + (y2 - y1) * PLATE_REGION["ymin"])
-    py2 = int(y1 + (y2 - y1) * PLATE_REGION["ymax"])
+    px1 = int(x1 + (x2 - x1) * PLATE_REGION_FALLBACK["xmin"])
+    px2 = int(x1 + (x2 - x1) * PLATE_REGION_FALLBACK["xmax"])
+    py1 = int(y1 + (y2 - y1) * PLATE_REGION_FALLBACK["ymin"])
+    py2 = int(y1 + (y2 - y1) * PLATE_REGION_FALLBACK["ymax"])
     px1 = max(0, min(px1, w - 1))
     px2 = max(px1 + 1, min(px2, w))
     py1 = max(0, min(py1, h - 1))
     py2 = max(py1 + 1, min(py2, h))
     return frame[py1:py2, px1:px2]
+
+
+def detect_plates(plate_model, frame, conf, imgsz, device):
+    """Run plate detection on a frame. Returns list of [x1, y1, x2, y2, confidence]."""
+    results = plate_model(frame, conf=conf, imgsz=imgsz, device=device, verbose=False)
+    plates = []
+    for r in results:
+        if r.boxes is None:
+            continue
+        h, w = r.orig_shape
+        for box in r.boxes:
+            x1, y1, x2, y2 = box.xyxy[0].tolist()
+            conf_score = float(box.conf[0])
+            plates.append({
+                "bbox_abs": [x1, y1, x2, y2],
+                "bbox_norm": [round(x1 / w, 6), round(y1 / h, 6),
+                             round(x2 / w, 6), round(y2 / h, 6)],
+                "confidence": round(conf_score, 4),
+            })
+    return plates
+
+
+def find_best_plate(plates, vehicle_box):
+    """Given a list of detected plates and a vehicle box, return the plate
+    with highest IoU overlap with the vehicle box, or None."""
+    if not plates:
+        return None
+    vx1, vy1, vx2, vy2 = vehicle_box
+    best_plate = None
+    best_iou = 0.0
+    for plate in plates:
+        px1, py1, px2, py2 = plate["bbox_abs"]
+        ix1 = max(vx1, px1)
+        iy1 = max(vy1, py1)
+        ix2 = min(vx2, px2)
+        iy2 = min(vy2, py2)
+        if ix2 <= ix1 or iy2 <= iy1:
+            continue
+        inter = (ix2 - ix1) * (iy2 - iy1)
+        v_area = (vx2 - vx1) * (vy2 - vy1)
+        p_area = (px2 - px1) * (py2 - py1)
+        union = v_area + p_area - inter
+        if union <= 0:
+            continue
+        iou = inter / union
+        if iou > best_iou:
+            best_iou = iou
+            best_plate = plate
+    return best_plate if best_iou > 0.1 else None
 
 
 def main():
@@ -174,6 +210,9 @@ def main():
     plate_model = None
     if args.plate_weights:
         plate_model = YOLO(args.plate_weights)
+        print(f"[plate] Loaded plate detector: {args.plate_weights}")
+    else:
+        print("[plate] No plate detector — using fixed bumper crop fallback")
 
     source, is_video, total_frames = open_source(args.source)
 
@@ -193,6 +232,11 @@ def main():
                 break
 
             h, w = frame.shape[:2]
+
+            # Detect plates on this frame if plate detector is available
+            plates_in_frame = []
+            if plate_model is not None:
+                plates_in_frame = detect_plates(plate_model, frame, args.conf, args.imgsz, args.device)
 
             # YOLO11n + ByteTrack
             results = model.track(
@@ -245,6 +289,7 @@ def main():
                             "max_conf": float(conf),
                             "last_frame": frame_idx,
                             "dumping_cues": [],
+                            "plate_detection_method": "detector" if plate_model else "fallback_crop",
                         }
 
                     trk = tracks[tid]
@@ -271,7 +316,27 @@ def main():
                     # Plate OCR on this frame if vehicle is in polygon
                     if inside:
                         vehicle_box = [x1, y1, x2, y2]
-                        plate_crop = crop_plate_region(frame, vehicle_box)
+                        plate_crop = None
+                        plate_crop_source = "none"
+
+                        if plate_model is not None:
+                            # Use detected plate region
+                            best_plate = find_best_plate(plates_in_frame, vehicle_box)
+                            if best_plate is not None:
+                                px1, py1, px2, py2 = [int(v) for v in best_plate["bbox_abs"]]
+                                px1 = max(0, min(px1, w - 1))
+                                px2 = max(px1 + 1, min(px2, w))
+                                py1 = max(0, min(py1, h - 1))
+                                py2 = max(py1 + 1, min(py2, h))
+                                plate_crop = frame[py1:py2, px1:px2]
+                                plate_crop_source = "detector"
+                                trk["last_plate_box"] = best_plate["bbox_norm"]
+
+                        if plate_crop is None or plate_crop.size == 0:
+                            # Fallback to fixed bumper crop
+                            plate_crop = crop_plate_region_fallback(frame, vehicle_box)
+                            plate_crop_source = "fallback_crop"
+
                         if plate_crop.size > 0:
                             try:
                                 ocr = get_reader()
@@ -283,6 +348,7 @@ def main():
                                         "frame": frame_idx,
                                         "text": text,
                                         "confidence": round(float(conf_score), 3),
+                                        "source": plate_crop_source,
                                     })
                                     if conf_score > trk["best_plate_conf"]:
                                         trk["best_plate_conf"] = float(conf_score)
@@ -291,6 +357,7 @@ def main():
                                             "confidence": round(float(conf_score), 3),
                                             "frame": frame_idx,
                                             "bbox": [round(float(v), 1) for v in bbox],
+                                            "source": plate_crop_source,
                                         }
                             except Exception:
                                 # OCR failure on this frame — silent
@@ -341,7 +408,6 @@ def main():
         # Multi-frame plate consensus: most frequent text across reads
         plate_consensus = None
         if trk["plate_reads"]:
-            from collections import Counter
             texts = [r["text"] for r in trk["plate_reads"]]
             most_common = Counter(texts).most_common(1)[0]
             consensus_text = most_common[0]
@@ -370,6 +436,7 @@ def main():
             "plate_reads": trk["plate_reads"],
             "dumping_cues": trk["dumping_cues"],
             "dumping_cue_count": len(trk["dumping_cues"]),
+            "plate_detection_method": trk["plate_detection_method"],
         }
         track_list.append(track_record)
 
@@ -424,7 +491,8 @@ def main():
     for t in track_list:
         if t["plate_consensus"]:
             print(f"  Track {t['track_id']} ({t['vehicle_type']}): plate={t['plate_consensus']['text']} "
-                  f"({t['plate_consensus']['read_count']}/{t['plate_consensus']['total_reads']} reads)")
+                  f"({t['plate_consensus']['read_count']}/{t['plate_consensus']['total_reads']} reads, "
+                  f"method={t['plate_detection_method']})")
 
 
 if __name__ == "__main__":
